@@ -1,0 +1,16 @@
+{
+  "filters": [
+    "none",
+    "hqdn3d_light",
+    "hqdn3d_spatial"
+  ],
+  "n_rows": 12,
+  "mean_delta_by_filter": {
+    "hqdn3d_light": -0.0033729687500000938,
+    "hqdn3d_spatial": -0.006069906250000068,
+    "none": 0.0
+  },
+  "any_gate_fail_with_filter": false,
+  "recommendation": "none",
+  "reason": "insufficient competition-score benefit or gate risk"
+}

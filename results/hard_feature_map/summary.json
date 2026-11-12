@@ -1,0 +1,125 @@
+{
+  "n_feature_clips": 34,
+  "n_sweep_clips": 14,
+  "n_generated_features": 32,
+  "n_arms": 7,
+  "n_trials": 78,
+  "overall_win_counts": {
+    "hard_nvenc_p6_noaq_fill": 2,
+    "hard_svt_p5_psnr": 7,
+    "hevc_nvenc_p6_vbr": 5
+  },
+  "default_hard_config_id": "hard_svt_p5_psnr",
+  "by_regime": {
+    "edge_heavy": "hard_nvenc_p6_noaq_fill",
+    "noisy_hf": "hard_svt_p5_psnr",
+    "bitrate_incompressible": "hevc_nvenc_p6_vbr"
+  },
+  "by_recipe": {
+    "labeled": "hard_nvenc_p6_noaq_fill",
+    "grain": "hard_svt_p5_psnr",
+    "sharp_grain": "hevc_nvenc_p6_vbr",
+    "edge_boost": "hevc_nvenc_p6_vbr",
+    "shake_grain": "hard_svt_p5_psnr"
+  },
+  "rules": [
+    {
+      "when": "regime==edge_heavy",
+      "config_id": "hard_nvenc_p6_noaq_fill",
+      "support": 1
+    },
+    {
+      "when": "regime==noisy_hf",
+      "config_id": "hard_svt_p5_psnr",
+      "support": 8
+    },
+    {
+      "when": "regime==bitrate_incompressible",
+      "config_id": "hevc_nvenc_p6_vbr",
+      "support": 5
+    },
+    {
+      "when": "default_hard",
+      "config_id": "hard_svt_p5_psnr",
+      "support": 14
+    }
+  ],
+  "arm_leaderboard_top5": [
+    {
+      "arm": "svt_av1_p7_psnr",
+      "mean_vmaf": 35.755143857142855,
+      "mean_score": 0.006860308333333324,
+      "stream_pass_rate": 0.7777777777777778,
+      "gate_pass_rate": 0.7777777777777778,
+      "mean_util": 0.9633328231813079,
+      "n": 9,
+      "mean_encode_s": 8.4791454763294
+    },
+    {
+      "arm": "av1_nvenc_p6_noaq",
+      "mean_vmaf": 32.81092875,
+      "mean_score": 0.0063863388888888845,
+      "stream_pass_rate": 0.8888888888888888,
+      "gate_pass_rate": 0.8888888888888888,
+      "mean_util": 0.9888597145699417,
+      "n": 9,
+      "mean_encode_s": 3.196374574876649
+    },
+    {
+      "arm": "hard_svt_p5_psnr",
+      "mean_vmaf": 35.280759,
+      "mean_score": 0.005138508928571423,
+      "stream_pass_rate": 0.5714285714285714,
+      "gate_pass_rate": 0.5714285714285714,
+      "mean_util": 1.3752817337334382,
+      "n": 14,
+      "mean_encode_s": 24.86900471651461
+    },
+    {
+      "arm": "av1_nvenc_p6_vbr",
+      "mean_vmaf": 31.767505625,
+      "mean_score": 0.003542477777777779,
+      "stream_pass_rate": 0.8888888888888888,
+      "gate_pass_rate": 0.8888888888888888,
+      "mean_util": 0.9724256453423118,
+      "n": 9,
+      "mean_encode_s": 3.067979236547318
+    },
+    {
+      "arm": "hard_nvenc_p7_fill",
+      "mean_vmaf": 31.088839375,
+      "mean_score": 0.002986636111111116,
+      "stream_pass_rate": 0.8888888888888888,
+      "gate_pass_rate": 0.8888888888888888,
+      "mean_util": 0.9732296130496887,
+      "n": 9,
+      "mean_encode_s": 3.6973274474342666
+    }
+  ],
+  "mean_winner_vmaf": 34.754398,
+  "mean_winner_score": 0.005138508928571423,
+  "fraction_stream_pass": 0.6428571428571429,
+  "fraction_score_gt0": 0.07142857142857142,
+  "incompressible_rate": 0.2647058823529412,
+  "policy_path": "results/hard_feature_map/hard_config_policy.json",
+  "runtime_policy_path": "/workspace/sn85-compression-005/streamenc/decision/hard_config_policy.json",
+  "method": {
+    "features": "Phase-5b vector + difficulty_score + achieved_util (baseline NVENC probe)",
+    "sweep": "14 clips (12 stratified generated + 2 labeled) \u00d7 7 encoder arms; short aim ladder",
+    "objective": "max (streaming_pass, gate_pass, clip_score, VMAF)",
+    "policy": "regime \u2192 winning config; wired via select_hard_config()",
+    "findings": [
+      "noisy_hf / grain / shake \u2192 hard_svt_p5_psnr (best score on ai_hard_06: 0.072)",
+      "edge_heavy \u2192 hard_nvenc_p6_noaq_fill",
+      "bitrate_incompressible (edge_boost/sharp_grain, util\u22651.15) \u2192 hevc_nvenc_p6_vbr closest util; often still fails streaming",
+      "26% of generated-hard clips are bitrate-incompressible at 0.05 bpp",
+      "Almost all generated hard stay VMAF\u226a60 \u2192 clip_score 0; ranking is VMAF among passers"
+    ]
+  },
+  "runtime_regime_proxy": {
+    "bitrate_incompressible": "highfreq_energy>=19 and spatial_p95>=95",
+    "agreement_vs_probe_regime": 0.91,
+    "incomp_precision": 0.88,
+    "incomp_recall": 0.78
+  }
+}

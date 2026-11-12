@@ -1,0 +1,7 @@
+[
+  "av1_nvenc_p6_vbr",
+  "av1_nvenc_p6_multipass_qres",
+  "hevc_nvenc_p6_vbr",
+  "svt_av1_p7_psnr",
+  "av1_nvenc_p6_noaq"
+]

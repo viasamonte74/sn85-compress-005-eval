@@ -1,0 +1,32 @@
+{
+  "phases": {
+    "1": "env/probe/score/run.sh contract",
+    "2": "NVENC AV1 baseline encode",
+    "3": "official streaming + VMAF/NEG + perceptual validator",
+    "4": "staged encoder benchmark + leaderboard",
+    "5": "sampled content features",
+    "6": "rule-based decision engine (beats fixed baseline)",
+    "7": "bounded selective correction controller",
+    "8": "prefilter eval → keep none (filters hurt score)",
+    "9": "batch bench: parallel-2 faster than serial on L40S",
+    "10": "submission hardening: run.sh, Dockerfile, docs, final e2e"
+  },
+  "recheck": {
+    "pytest": "31 passed",
+    "final_e2e_pass": true,
+    "runsh_exit_0": true,
+    "outputs_match_inputs": true,
+    "no_temp_leftovers": true,
+    "no_symlinks": true,
+    "quality_mean_4clip": 0.70346,
+    "estimated_final_score_extrapolated": 0.67843,
+    "speed_score_extrapolated": 0.8814,
+    "wall_seconds_4clip": 30.66,
+    "batch_mode_default": "parallel/2"
+  },
+  "known_limits": [
+    "Hard clips can still land near/below VMAF 60 (low clip_score) while passing gates",
+    "Submission image must replace Ubuntu GPL FFmpeg with commercial-compatible pinned build",
+    "Extrapolated runtime to 3428 frames still above ~114s speed saturation on this 4-clip mix"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+ "rc": 0,
+ "n": 23,
+ "frames": 3273,
+ "wall_seconds": 260.28,
+ "spf": 0.0795223717225984,
+ "runtime_3428": 272.6,
+ "speed": 0.7876,
+ "quality": 0.491,
+ "final": 0.4597,
+ "n_passed": 23,
+ "model": "models/crf_predictor_eval_c_final.pkl",
+ "cpus": "0-31",
+ "workers": 4
+}

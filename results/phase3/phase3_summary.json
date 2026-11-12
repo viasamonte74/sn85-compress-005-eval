@@ -1,0 +1,14 @@
+{
+  "total": 16,
+  "ok": 15,
+  "failed": 1,
+  "jsonl": "results/phase3/phase3_reports.jsonl",
+  "mean_vmaf": 70.09084,
+  "mean_clip_score": 0.42226350833333337,
+  "notes": [
+    "Packet/keyframe/VMAF math matched miner-vidaio streaming.py + backends_real.py",
+    "Perceptual sampler uses software ffmpeg frame extract (OpenCV cannot decode AV1 on this host); decision formulas/thresholds are official perceptual_cpu.py",
+    "Representative 16 encodes: 15/16 pass hard gates; rnd_hard_08_1080 fails VMAF_MODEL_DELTA (3.73 > 3.0)",
+    "Several hard AI/render clips pass delivery gates but score 0 from VMAF < 60"
+  ]
+}

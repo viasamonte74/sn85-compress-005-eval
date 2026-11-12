@@ -1,0 +1,6 @@
+{
+  "ok": true,
+  "attempts": 4,
+  "config": "av1_nvenc_p6_noaq",
+  "note": "bounded correction smoke on hard clip"
+}

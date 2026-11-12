@@ -1,0 +1,41 @@
+{
+ "batches": [
+  {
+   "batch": 0,
+   "list": "e2e_practice",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 27.888
+  },
+  {
+   "batch": 1,
+   "list": "e2e_practice",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 32.375
+  }
+ ],
+ "all": {
+  "n": 8,
+  "frames": 1812,
+  "wall_seconds": 60.26,
+  "runtime_3428": 114.0,
+  "speed": 1.0,
+  "quality": 0.7635,
+  "final": 0.7635,
+  "n_passed": 8
+ },
+ "e2e_practice": {
+  "n": 8,
+  "frames": 1812,
+  "wall_seconds": 60.26,
+  "runtime_3428": 114.0,
+  "speed": 1.0,
+  "quality": 0.7635,
+  "final": 0.7635,
+  "n_passed": 8
+ },
+ "model": "models/crf_predictor_c0_s3.pkl",
+ "cpus": "0-31",
+ "batch": 4
+}

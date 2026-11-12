@@ -1,0 +1,62 @@
+{
+  "n_clips": 60,
+  "n_generated": 24,
+  "detector": {
+    "tp": 34,
+    "tn": 16,
+    "fp": 8,
+    "fn": 2,
+    "precision": 0.8095238095238095,
+    "recall": 0.9444444444444444,
+    "f1": 0.8717948717948718
+  },
+  "difficulty_by_tier": [
+    {
+      "tier_label": "easy",
+      "mean": 0.16407505666371483,
+      "median": 0.14226944389548796,
+      "count": 12
+    },
+    {
+      "tier_label": "hard",
+      "mean": 0.8633749383585796,
+      "median": 0.9186952319061572,
+      "count": 36
+    },
+    {
+      "tier_label": "medium",
+      "mean": 0.4455293366785604,
+      "median": 0.4595653966799993,
+      "count": 12
+    }
+  ],
+  "generated_difficulty": {
+    "mean": 0.9183133519977775,
+    "median": 0.9200041525088212,
+    "hard_pred_rate": 1.0
+  },
+  "feature_names": [
+    "spatial_complexity",
+    "temporal_complexity",
+    "edge_density",
+    "frame_diff_mean",
+    "frame_diff_std",
+    "frame_diff_p95",
+    "repeated_frame_ratio",
+    "motion_complexity",
+    "texture_complexity",
+    "smooth_gradient_ratio",
+    "chroma_complexity",
+    "temporal_instability",
+    "highfreq_energy",
+    "noise_estimate",
+    "entropy",
+    "motion_p95",
+    "spatial_p95",
+    "detail_density"
+  ],
+  "corr_difficulty_vs_official_score": -0.8610008477147384,
+  "n_generated_on_disk": 32,
+  "generated_dir": "/workspace/dataset/generated_hard",
+  "note": "Analysis table used 24 gens available at run time; 8 shake_grain added after."
+}

@@ -1,0 +1,69 @@
+{
+  "train_clips": [
+    "ai_easy_01",
+    "ai_easy_05",
+    "rnd_easy_01",
+    "rnd_easy_02",
+    "scr_easy_05",
+    "scr_easy_06"
+  ],
+  "test_clips": [
+    "ai_hard_03",
+    "rnd_easy_06",
+    "scr_easy_02"
+  ],
+  "train_families": [
+    "ai_easy_01",
+    "ai_easy_05",
+    "rnd_easy_01",
+    "rnd_easy_02",
+    "scr_easy_05",
+    "scr_easy_06"
+  ],
+  "test_families": [
+    "ai_hard_03",
+    "rnd_easy_06",
+    "scr_easy_02"
+  ],
+  "n_configs_stage1": 13,
+  "promising_configs": [
+    "av1_nvenc_p6_vbr",
+    "av1_nvenc_p6_multipass_qres",
+    "hevc_nvenc_p6_vbr",
+    "svt_av1_p7_psnr",
+    "av1_nvenc_p6_noaq"
+  ],
+  "n_stage1_rows": 78,
+  "n_stage2_rows": 45,
+  "results_dir": "results/phase4",
+  "top_train": {
+    "config_id": "svt_av1_p7_psnr",
+    "codec": "libsvtav1",
+    "n_clips": 6,
+    "n_passed": 6,
+    "pass_rate": 1.0,
+    "mean_vmaf": 93.02853883333334,
+    "mean_clip_score": 0.8257134708333335,
+    "mean_encode_seconds": 3.023496055994959,
+    "spf": 0.01640232941769417,
+    "extrapolated_runtime_s": 56.227185243855615,
+    "speed_score": 1.0,
+    "speed_multiplier": 1.0,
+    "estimated_final_score": 0.8257134708333335
+  },
+  "top_test": {
+    "config_id": "svt_av1_p7_psnr",
+    "codec": "libsvtav1",
+    "n_clips": 3,
+    "n_passed": 3,
+    "pass_rate": 1.0,
+    "mean_vmaf": 77.755482,
+    "mean_clip_score": 0.6232957,
+    "mean_encode_seconds": 2.8266757170010046,
+    "spf": 0.013655438246381664,
+    "extrapolated_runtime_s": 46.81084230859634,
+    "speed_score": 1.0,
+    "speed_multiplier": 1.0,
+    "estimated_final_score": 0.6232957
+  }
+}

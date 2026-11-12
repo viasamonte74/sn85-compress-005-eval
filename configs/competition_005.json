@@ -1,0 +1,46 @@
+{
+  "competition_id": "sn85-compression-005",
+  "manifest_digest": "6674dc9095dc1a8317d4aebaf313615485eaa5145a1d5e49157b39acbbb68caa",
+  "scoring_version": "vidaio-scorer/1+8f10f37c629e",
+  "streaming_rules": {
+    "bits_per_pixel": 0.05,
+    "max_keyframe_interval_seconds": 2.0,
+    "peak_ratio": 1.5,
+    "peak_window_seconds": 2.0
+  },
+  "average_bitrate_tolerance": 0.01,
+  "result_rules": {
+    "crown_min_score": 0.75,
+    "podium_min_score": 0.6,
+    "speed_weight": 0.3,
+    "speed_fast_spf": 0.03333333333333333,
+    "speed_slow_spf": 2.0,
+    "speed_inserted_frames": 3428
+  },
+  "sandbox": {
+    "cpu": 32,
+    "memory_mb": 65536,
+    "batch_timeout_seconds": 3600,
+    "batch_size": 4,
+    "allowed_gpus": ["L40S"],
+    "container_size_limit_gb": 20,
+    "max_output_file_bytes": 536870912,
+    "max_output_batch_bytes": 2147483648
+  },
+  "run_contract": {
+    "invocation": "/bin/sh /app/run.sh INPUT_DIR OUTPUT_DIR",
+    "input_naming": "64-hex sha256, no extension, FFV1 in Matroska",
+    "output_naming": "same basename as input, plain regular file mode 0644",
+    "writable_paths": ["/tmp", "OUTPUT_DIR"],
+    "network": false,
+    "injected_env": false,
+    "non_zero_exit_zeroes_batch": true,
+    "source": "miner-vidaio examples/competition_contenders/streaming_example/run.sh"
+  },
+  "official_urls": {
+    "page": "https://vidaio.io/competitions/sn85-compression-005",
+    "manifest": "https://vidaio.io/api/hub/v1/competitions/sn85-compression-005/manifest",
+    "example_entry": "https://github.com/vidAio-subnet/miner-vidaio/tree/main/examples/competition_contenders/streaming_example",
+    "practice_pack": "https://github.com/vidAio-subnet/miner-vidaio/releases/tag/practice-pack-005"
+  }
+}

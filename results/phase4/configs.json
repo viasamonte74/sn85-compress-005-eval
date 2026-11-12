@@ -1,0 +1,144 @@
+[
+  {
+    "config_id": "av1_nvenc_p5_vbr",
+    "codec": "av1_nvenc",
+    "stage": 1,
+    "params": {
+      "preset": "p5",
+      "rc": "vbr"
+    },
+    "notes": "baseline VBR family"
+  },
+  {
+    "config_id": "av1_nvenc_p6_vbr",
+    "codec": "av1_nvenc",
+    "stage": 1,
+    "params": {
+      "preset": "p6",
+      "rc": "vbr"
+    },
+    "notes": "baseline VBR family"
+  },
+  {
+    "config_id": "av1_nvenc_p7_vbr",
+    "codec": "av1_nvenc",
+    "stage": 1,
+    "params": {
+      "preset": "p7",
+      "rc": "vbr"
+    },
+    "notes": "baseline VBR family"
+  },
+  {
+    "config_id": "av1_nvenc_p6_noaq",
+    "codec": "av1_nvenc",
+    "stage": 1,
+    "params": {
+      "preset": "p6",
+      "spatial_aq": false,
+      "temporal_aq": false
+    },
+    "notes": "disable AQ"
+  },
+  {
+    "config_id": "av1_nvenc_p6_la32",
+    "codec": "av1_nvenc",
+    "stage": 1,
+    "params": {
+      "preset": "p6",
+      "rc_lookahead": 32
+    },
+    "notes": "longer lookahead"
+  },
+  {
+    "config_id": "av1_nvenc_p6_multipass_qres",
+    "codec": "av1_nvenc",
+    "stage": 1,
+    "params": {
+      "preset": "p6",
+      "multipass": "qres"
+    },
+    "notes": "quarter-res multipass"
+  },
+  {
+    "config_id": "av1_nvenc_p6_10bit",
+    "codec": "av1_nvenc",
+    "stage": 1,
+    "params": {
+      "preset": "p6",
+      "highbitdepth": true
+    },
+    "notes": "10-bit encode from 8-bit input"
+  },
+  {
+    "config_id": "hevc_nvenc_p6_vbr",
+    "codec": "hevc_nvenc",
+    "stage": 1,
+    "params": {
+      "preset": "p6",
+      "rc": "vbr"
+    },
+    "notes": "HEVC NVENC challenger"
+  },
+  {
+    "config_id": "svt_av1_p5_psnr",
+    "codec": "libsvtav1",
+    "stage": 1,
+    "params": {
+      "preset": 5,
+      "svtav1_params": {
+        "tune": 1
+      }
+    },
+    "notes": "SVT-AV1 PSNR tune"
+  },
+  {
+    "config_id": "svt_av1_p6_psnr",
+    "codec": "libsvtav1",
+    "stage": 1,
+    "params": {
+      "preset": 6,
+      "svtav1_params": {
+        "tune": 1
+      }
+    },
+    "notes": "SVT-AV1 PSNR tune"
+  },
+  {
+    "config_id": "svt_av1_p7_psnr",
+    "codec": "libsvtav1",
+    "stage": 1,
+    "params": {
+      "preset": 7,
+      "svtav1_params": {
+        "tune": 1
+      }
+    },
+    "notes": "SVT-AV1 PSNR tune"
+  },
+  {
+    "config_id": "svt_av1_p6_vq",
+    "codec": "libsvtav1",
+    "stage": 1,
+    "params": {
+      "preset": 6,
+      "svtav1_params": {
+        "tune": 0
+      }
+    },
+    "notes": "SVT-AV1 VQ/VMAF-oriented tune"
+  },
+  {
+    "config_id": "svt_av1_p6_10bit",
+    "codec": "libsvtav1",
+    "stage": 1,
+    "params": {
+      "preset": 6,
+      "pix_fmt": "yuv420p10le",
+      "svtav1_params": {
+        "tune": 1
+      }
+    },
+    "notes": "SVT 10-bit"
+  }
+]

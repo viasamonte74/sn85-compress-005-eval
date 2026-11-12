@@ -1,0 +1,23 @@
+{
+  "n_clips": 9,
+  "prefer_quality": true,
+  "baseline_config": "av1_nvenc_p6_vbr",
+  "adaptive_mean_clip_score": 0.41251390833333335,
+  "baseline_mean_clip_score": 0.3946178972222223,
+  "mean_delta_clip_score": 0.017896011111111092,
+  "wins": 4,
+  "losses": 1,
+  "ties": 4,
+  "adaptive_mean_wall_s": 30.832958825663404,
+  "baseline_mean_wall_s": 29.35155519088342,
+  "beats_baseline": true,
+  "ml_trained": false,
+  "ml_skipped_reason": "rules already beat baseline; Phase-4 labelled set too small for robust LightGBM/CatBoost",
+  "rule_counts": {
+    "R1_high_motion": 4,
+    "R4_default_svt": 2,
+    "R2_screen_svt": 2,
+    "R3_smooth_svt": 1
+  },
+  "recommendation": "ship_rules"
+}

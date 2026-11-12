@@ -1,0 +1,11 @@
+clip_id,arm,codec,prefilter,aim,attempts,passed_streaming,codes,avg_kbps,peak_kbps,util,vmaf,vmaf_neg,vmaf_delta,clip_score,encode_seconds,spf,error
+ai_hard_18,svt_p6_t1,libsvtav1,none,0.985,1,True,,866.31,1096.97,0.7833,52.8452,50.8863,1.9589,0.0,4.332070111006033,0.0358,
+ai_hard_18,nv_av1_p7_uhq,av1_nvenc,none,0.86,4,False,STREAMING_BITRATE_EXCEEDED,1176.59,1305.27,1.0639,,,,,17.076446516031865,0.1411,
+ai_hard_18,nv_av1_p7_uhq_tf,av1_nvenc,none,0.86,4,False,STREAMING_BITRATE_EXCEEDED,1176.56,1305.52,1.0639,,,,,17.450151306053158,0.1442,
+ai_hard_18,nv_hevc_p7_uhq,hevc_nvenc,none,0.985,1,True,,920.85,1074.81,0.8327,46.2897,44.8455,1.4442,0.0,5.336365702038165,0.0441,
+ai_hard_18,svt_p4_t1_sr_auto,libsvtav1,none,0.985,1,True,,1000.05,990.44,0.9043,56.8934,54.8072,2.0862,0.0,10.582255058980081,0.0875,
+ai_hard_18,x265_medium_psnr,libx265,none,0.985,1,True,,1070.04,1129.34,0.9676,50.7422,49.1826,1.5596,0.0,14.571232604968827,0.1204,
+ai_hard_18,x264_veryslow_psnr,libx264,none,0.985,1,True,,1061.24,1122.49,0.9596,51.5631,49.8906,1.6725,0.0,17.35872613894753,0.1435,
+ai_hard_18,vp9_c3,libvpx-vp9,none,0.985,1,True,,1108.9,1227.87,1.0027,51.1733,49.4462,1.7271,0.0,21.132492239004932,0.1746,
+ai_hard_18,aom_c5_psnr,libaom-av1,none,0.985,1,True,,1072.68,1149.63,0.9699,53.788,52.1563,1.6316,0.0,25.83031235303497,0.2135,
+ai_hard_18,rav1e_s4,librav1e,none,0.91,3,True,,1092.83,1353.74,0.9882,47.8327,45.9685,1.8642,0.0,352.35724286100594,2.912,

@@ -1,0 +1,305 @@
+{
+  "n_clips": 4,
+  "clip_ids": [
+    "ai_easy_01",
+    "rnd_easy_02",
+    "scr_easy_05",
+    "ai_easy_12"
+  ],
+  "serial": {
+    "mode": "serial",
+    "wall_seconds": 30.79026059998432,
+    "total_frames": 566,
+    "n_ok": 4,
+    "n_fail": 0,
+    "mean_clip_score_proxy": null,
+    "estimated_final_score": null,
+    "items": [
+      {
+        "input": "/workspace/dataset/ai/ai_easy_01.mkv",
+        "output": "/workspace/sn85-compression-005/work/phase9/serial/ai_easy_01",
+        "ok": true,
+        "clip_id": "ai_easy_01.mkv",
+        "config_id": "svt_av1_p7_psnr",
+        "rule_id": "R4_default_svt",
+        "prefilter": "none",
+        "feature_seconds": 0.3680364699685015,
+        "encode_seconds": 2.4638045789906755,
+        "total_seconds": 9.05655299499631,
+        "attempts": 1,
+        "avg_kbps": 961.5851900826445,
+        "peak_kbps": 1224.804,
+        "frames": 121,
+        "reason": "",
+        "fallback_used": false,
+        "extras": {
+          "history": [
+            {
+              "attempt": 1,
+              "config_id": "svt_av1_p7_psnr",
+              "aim": 0.975,
+              "encode_seconds": 2.4638045789906755,
+              "ffmpeg_ok": true,
+              "avg_kbps": 961.5851900826445,
+              "peak_kbps": 1224.804,
+              "codes": []
+            }
+          ]
+        }
+      },
+      {
+        "input": "/workspace/dataset/render/rnd_easy_02.mkv",
+        "output": "/workspace/sn85-compression-005/work/phase9/serial/rnd_easy_02",
+        "ok": true,
+        "clip_id": "rnd_easy_02.mkv",
+        "config_id": "svt_av1_p7_psnr",
+        "rule_id": "R3_smooth_svt",
+        "prefilter": "none",
+        "feature_seconds": 0.3828692519455217,
+        "encode_seconds": 2.045909471984487,
+        "total_seconds": 8.138287084992044,
+        "attempts": 1,
+        "avg_kbps": 848.3826666666666,
+        "peak_kbps": 1107.24,
+        "frames": 144,
+        "reason": "",
+        "fallback_used": false,
+        "extras": {
+          "history": [
+            {
+              "attempt": 1,
+              "config_id": "svt_av1_p7_psnr",
+              "aim": 0.975,
+              "encode_seconds": 2.045909471984487,
+              "ffmpeg_ok": true,
+              "avg_kbps": 848.3826666666666,
+              "peak_kbps": 1107.24,
+              "codes": []
+            }
+          ]
+        }
+      },
+      {
+        "input": "/workspace/dataset/screen/scr_easy_05.mkv",
+        "output": "/workspace/sn85-compression-005/work/phase9/serial/scr_easy_05",
+        "ok": true,
+        "clip_id": "scr_easy_05.mkv",
+        "config_id": "svt_av1_p7_psnr",
+        "rule_id": "R2_screen_svt",
+        "prefilter": "none",
+        "feature_seconds": 0.19506631599506363,
+        "encode_seconds": 1.2582034600200132,
+        "total_seconds": 2.391560029995162,
+        "attempts": 1,
+        "avg_kbps": 43.88666666666666,
+        "peak_kbps": 60.904,
+        "frames": 180,
+        "reason": "",
+        "fallback_used": false,
+        "extras": {
+          "history": [
+            {
+              "attempt": 1,
+              "config_id": "svt_av1_p7_psnr",
+              "aim": 0.975,
+              "encode_seconds": 1.2582034600200132,
+              "ffmpeg_ok": true,
+              "avg_kbps": 43.88666666666666,
+              "peak_kbps": 60.904,
+              "codes": []
+            }
+          ]
+        }
+      },
+      {
+        "input": "/workspace/dataset/ai/ai_easy_12.mkv",
+        "output": "/workspace/sn85-compression-005/work/phase9/serial/ai_easy_12",
+        "ok": true,
+        "clip_id": "ai_easy_12.mkv",
+        "config_id": "svt_av1_p7_psnr",
+        "rule_id": "R4_default_svt",
+        "prefilter": "none",
+        "feature_seconds": 0.2072150330641307,
+        "encode_seconds": 1.7524489450152032,
+        "total_seconds": 3.9197765460121445,
+        "attempts": 1,
+        "avg_kbps": 699.5416859504132,
+        "peak_kbps": 813.984,
+        "frames": 121,
+        "reason": "",
+        "fallback_used": false,
+        "extras": {
+          "history": [
+            {
+              "attempt": 1,
+              "config_id": "svt_av1_p7_psnr",
+              "aim": 0.975,
+              "encode_seconds": 1.7524489450152032,
+              "ffmpeg_ok": true,
+              "avg_kbps": 699.5416859504132,
+              "peak_kbps": 813.984,
+              "codes": []
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "parallel2": {
+    "mode": "parallel:2",
+    "wall_seconds": 19.272661842987873,
+    "total_frames": 566,
+    "n_ok": 4,
+    "n_fail": 0,
+    "mean_clip_score_proxy": null,
+    "estimated_final_score": null,
+    "items": [
+      {
+        "input": "/workspace/dataset/ai/ai_easy_01.mkv",
+        "output": "/workspace/sn85-compression-005/work/phase9/parallel2/ai_easy_01",
+        "ok": true,
+        "clip_id": "ai_easy_01.mkv",
+        "config_id": "svt_av1_p7_psnr",
+        "rule_id": "R4_default_svt",
+        "prefilter": "none",
+        "feature_seconds": 0.37958099495153874,
+        "encode_seconds": 5.533272484026384,
+        "total_seconds": 12.063917309977114,
+        "attempts": 2,
+        "avg_kbps": 823.8767603305785,
+        "peak_kbps": 1088.96,
+        "frames": 121,
+        "reason": "",
+        "fallback_used": true,
+        "extras": {
+          "history": [
+            {
+              "attempt": 1,
+              "config_id": "svt_av1_p7_psnr",
+              "aim": 0.975,
+              "encode_seconds": 3.1639828759944066,
+              "ffmpeg_ok": false,
+              "error": "Svt[info]: -------------------------------------------\nSvt[info]: SVT [version]:\tSVT-AV1 Encoder Lib v1.7.0\nSvt[info]: SVT [build]  :\tGCC 13.2.0\t 64 bit\nSvt[info]: -------------------------------------------\nSvt[info]: Number of logical cor"
+            },
+            {
+              "attempt": 2,
+              "config_id": "svt_av1_p7_psnr",
+              "aim": 0.94,
+              "encode_seconds": 2.369289608031977,
+              "ffmpeg_ok": true,
+              "avg_kbps": 823.8767603305785,
+              "peak_kbps": 1088.96,
+              "codes": []
+            }
+          ]
+        }
+      },
+      {
+        "input": "/workspace/dataset/render/rnd_easy_02.mkv",
+        "output": "/workspace/sn85-compression-005/work/phase9/parallel2/rnd_easy_02",
+        "ok": true,
+        "clip_id": "rnd_easy_02.mkv",
+        "config_id": "svt_av1_p7_psnr",
+        "rule_id": "R3_smooth_svt",
+        "prefilter": "none",
+        "feature_seconds": 0.37963472306728363,
+        "encode_seconds": 2.396603336033877,
+        "total_seconds": 8.504286333045457,
+        "attempts": 1,
+        "avg_kbps": 844.432,
+        "peak_kbps": 1102.004,
+        "frames": 144,
+        "reason": "",
+        "fallback_used": false,
+        "extras": {
+          "history": [
+            {
+              "attempt": 1,
+              "config_id": "svt_av1_p7_psnr",
+              "aim": 0.975,
+              "encode_seconds": 2.396603336033877,
+              "ffmpeg_ok": true,
+              "avg_kbps": 844.432,
+              "peak_kbps": 1102.004,
+              "codes": []
+            }
+          ]
+        }
+      },
+      {
+        "input": "/workspace/dataset/screen/scr_easy_05.mkv",
+        "output": "/workspace/sn85-compression-005/work/phase9/parallel2/scr_easy_05",
+        "ok": true,
+        "clip_id": "scr_easy_05.mkv",
+        "config_id": "svt_av1_p7_psnr",
+        "rule_id": "R2_screen_svt",
+        "prefilter": "none",
+        "feature_seconds": 0.1955235610366799,
+        "encode_seconds": 1.2575943099800497,
+        "total_seconds": 2.4077770030125976,
+        "attempts": 1,
+        "avg_kbps": 43.88666666666666,
+        "peak_kbps": 60.904,
+        "frames": 180,
+        "reason": "",
+        "fallback_used": false,
+        "extras": {
+          "history": [
+            {
+              "attempt": 1,
+              "config_id": "svt_av1_p7_psnr",
+              "aim": 0.975,
+              "encode_seconds": 1.2575943099800497,
+              "ffmpeg_ok": true,
+              "avg_kbps": 43.88666666666666,
+              "peak_kbps": 60.904,
+              "codes": []
+            }
+          ]
+        }
+      },
+      {
+        "input": "/workspace/dataset/ai/ai_easy_12.mkv",
+        "output": "/workspace/sn85-compression-005/work/phase9/parallel2/ai_easy_12",
+        "ok": true,
+        "clip_id": "ai_easy_12.mkv",
+        "config_id": "svt_av1_p7_psnr",
+        "rule_id": "R4_default_svt",
+        "prefilter": "none",
+        "feature_seconds": 0.2076452609617263,
+        "encode_seconds": 1.8098383389879018,
+        "total_seconds": 3.9760260870098136,
+        "attempts": 1,
+        "avg_kbps": 711.7535206611569,
+        "peak_kbps": 837.72,
+        "frames": 121,
+        "reason": "",
+        "fallback_used": false,
+        "extras": {
+          "history": [
+            {
+              "attempt": 1,
+              "config_id": "svt_av1_p7_psnr",
+              "aim": 0.975,
+              "encode_seconds": 1.8098383389879018,
+              "ffmpeg_ok": true,
+              "avg_kbps": 711.7535206611569,
+              "peak_kbps": 837.72,
+              "codes": []
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "runsh": {
+    "wall_seconds": 32.3500231319922,
+    "exit_code": 0,
+    "n_outputs": 4,
+    "temp_leftovers": 0
+  },
+  "winner": "parallel2",
+  "recommendation": "parallel2",
+  "serial_extrapolated_3428_s": 186.48235571863296,
+  "speed_saturation_target_s": 114.0
+}

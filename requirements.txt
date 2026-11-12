@@ -1,0 +1,9 @@
+# Runtime orchestration deps for the contender (stdlib + these). Exact pins = reproducible image.
+# ffmpeg/ffprobe (NVENC + SVT-AV1 + libvmaf) come from the pinned BtbN static build in the Dockerfile.
+numpy==2.5.4
+opencv-python-headless==5.0.0.93
+# CRF predictor (streamenc/ml/crf_predictor): pickled HistGradientBoosting models need the exact sklearn.
+scikit-learn==1.9.1
+scipy==1.18.1
+joblib==1.6.0
+threadpoolctl==3.8.0

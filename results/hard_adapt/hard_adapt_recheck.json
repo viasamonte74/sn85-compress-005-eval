@@ -1,0 +1,90 @@
+[
+  {
+    "clip": "ai_hard_06",
+    "arm": "baseline",
+    "ok": true,
+    "passed": true,
+    "vmaf": 63.366406,
+    "score": 0.08416014999999995,
+    "pf": "none",
+    "cfg": "hard_svt_p5_psnr",
+    "tag": null
+  },
+  {
+    "clip": "ai_hard_06",
+    "arm": "adapted",
+    "ok": true,
+    "passed": true,
+    "vmaf": 63.20831,
+    "score": 0.08020774999999994,
+    "pf": "none",
+    "cfg": "hard_svt_p5_psnr",
+    "tag": "primary"
+  },
+  {
+    "clip": "gen_hard_01_grain_ai_hard_13",
+    "arm": "baseline",
+    "ok": false,
+    "passed": false,
+    "vmaf": null,
+    "score": null,
+    "pf": "none",
+    "cfg": "hard_svt_p5_psnr",
+    "tag": null
+  },
+  {
+    "clip": "gen_hard_01_grain_ai_hard_13",
+    "arm": "adapted",
+    "ok": true,
+    "passed": true,
+    "vmaf": 28.15011,
+    "score": 0.0,
+    "pf": "hard_denoise",
+    "cfg": "hard_nvenc_p6_noaq_fill+hard_denoise+fix1+fix2+fix3",
+    "tag": "salvage_alt"
+  },
+  {
+    "clip": "ai_hard_12",
+    "arm": "baseline",
+    "ok": true,
+    "passed": true,
+    "vmaf": 44.202713,
+    "score": 0.0,
+    "pf": "none",
+    "cfg": "hard_svt_p5_psnr",
+    "tag": null
+  },
+  {
+    "clip": "ai_hard_12",
+    "arm": "adapted",
+    "ok": true,
+    "passed": true,
+    "vmaf": 44.407657,
+    "score": 0.0,
+    "pf": "none",
+    "cfg": "hard_svt_p5_psnr",
+    "tag": "primary"
+  },
+  {
+    "clip": "rnd_hard_06",
+    "arm": "baseline",
+    "ok": true,
+    "passed": true,
+    "vmaf": 54.478208,
+    "score": 0.0,
+    "pf": "none",
+    "cfg": "hard_svt_p5_psnr+fix1+fix2+fix3+fix4",
+    "tag": null
+  },
+  {
+    "clip": "rnd_hard_06",
+    "arm": "adapted",
+    "ok": true,
+    "passed": true,
+    "vmaf": 54.178982,
+    "score": 0.0,
+    "pf": "none",
+    "cfg": "hard_svt_p5_psnr+fix1+fix2+fix3+fix4",
+    "tag": "primary"
+  }
+]

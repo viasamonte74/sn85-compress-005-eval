@@ -1,0 +1,24 @@
+{
+  "verdict": "hard-path gives small VMAF gains; not enough alone for crown 0.75",
+  "ab_highlights": {
+    "ai_hard_06_best": {
+      "arm": "hard_svt_p5_psnr",
+      "vmaf": 63.40,
+      "clip_score": 0.085,
+      "vs_baseline_noaq_score": 0.057,
+      "delta_score": 0.028
+    },
+    "typical_hard_floor": "most hard clips remain VMAF 18–52 → clip_score 0",
+    "aggressive_0.995_aim": "lowered pass rate (0.6–0.8); softened to start at 0.97"
+  },
+  "wired": {
+    "DEFAULT_HARD_CONFIG_ID": "hard_svt_p5_psnr",
+    "detection": "motion/temporal >= 0.04",
+    "HARD_AIM_LADDER": [0.97, 0.94, 0.9, 0.85, 0.78, 0.7],
+    "fill_up": true
+  },
+  "estimated_final_mix_impact": {
+    "quality_mean_delta": "~+0.007 on prior 4-clip proxy",
+    "still_below_0.75": true
+  }
+}

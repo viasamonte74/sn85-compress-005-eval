@@ -1,0 +1,101 @@
+{
+  "ok": true,
+  "checks": [
+    {
+      "name": "python",
+      "ok": true,
+      "detail": "3.12.15 (/venv/main/bin/python3)",
+      "required_for_phase1": true
+    },
+    {
+      "name": "ffmpeg",
+      "ok": true,
+      "detail": "/usr/bin/ffmpeg",
+      "required_for_phase1": true
+    },
+    {
+      "name": "ffprobe",
+      "ok": true,
+      "detail": "/usr/bin/ffprobe",
+      "required_for_phase1": true
+    },
+    {
+      "name": "ffmpeg_version",
+      "ok": true,
+      "detail": "ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers",
+      "required_for_phase1": false
+    },
+    {
+      "name": "encoder_av1_nvenc_listed",
+      "ok": true,
+      "detail": "av1_nvenc in ffmpeg -encoders",
+      "required_for_phase1": true
+    },
+    {
+      "name": "encoder_hevc_nvenc_listed",
+      "ok": true,
+      "detail": "hevc_nvenc in ffmpeg -encoders",
+      "required_for_phase1": true
+    },
+    {
+      "name": "encoder_libsvtav1_listed",
+      "ok": true,
+      "detail": "libsvtav1 in ffmpeg -encoders",
+      "required_for_phase1": true
+    },
+    {
+      "name": "filter_libvmaf",
+      "ok": false,
+      "detail": "MISSING \u2014 needed in Phase 3",
+      "required_for_phase1": false
+    },
+    {
+      "name": "libnvidia_encode",
+      "ok": true,
+      "detail": "/opt/nvidia-drivers/lib64/libnvidia-encode.so.1",
+      "required_for_phase1": true
+    },
+    {
+      "name": "nvidia_smi",
+      "ok": true,
+      "detail": "NVIDIA L40S, 46068 MiB, 595.91.07",
+      "required_for_phase1": true
+    },
+    {
+      "name": "smoke_av1_nvenc",
+      "ok": true,
+      "detail": "av1,1280,720",
+      "required_for_phase1": true
+    },
+    {
+      "name": "smoke_hevc_nvenc",
+      "ok": true,
+      "detail": "hevc,1280,720",
+      "required_for_phase1": false
+    },
+    {
+      "name": "smoke_libsvtav1",
+      "ok": true,
+      "detail": "bytes=126744",
+      "required_for_phase1": true
+    },
+    {
+      "name": "dataset_mkv_files",
+      "ok": true,
+      "detail": "179 mkv under /workspace/dataset",
+      "required_for_phase1": true
+    },
+    {
+      "name": "competition_config",
+      "ok": true,
+      "detail": "/workspace/sn85-compression-005/configs/competition_005.json",
+      "required_for_phase1": true
+    },
+    {
+      "name": "streaming_rules_match_manifest",
+      "ok": true,
+      "detail": "{\"bits_per_pixel\": 0.05, \"max_keyframe_interval_seconds\": 2.0, \"peak_ratio\": 1.5, \"peak_window_seconds\": 2.0}",
+      "required_for_phase1": true
+    }
+  ]
+}

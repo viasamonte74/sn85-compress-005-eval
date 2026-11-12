@@ -1,0 +1,358 @@
+{
+  "checks": {
+    "runsh_exit_0": true,
+    "n_inputs": 4,
+    "n_outputs": 4,
+    "all_regular_0644": true,
+    "no_symlinks": true,
+    "no_temp_leftovers": true,
+    "basename_match": true,
+    "wall_seconds": 62.88170829997398,
+    "temp_names": []
+  },
+  "quality_mean": 0.8580883062500001,
+  "total_frames": 566,
+  "wall_seconds": 62.88170829997398,
+  "extrapolated_runtime_3428": 380.8453993857081,
+  "speed_score": 0.7059703694849809,
+  "estimated_final_score": 0.7823972899592162,
+  "per_clip": [
+    {
+      "name": "0000000000000000000000000000000000000000000000000000000000000000",
+      "ref": "/workspace/dataset/ai/ai_easy_01.mkv",
+      "exists": true,
+      "passed": true,
+      "violations": [],
+      "metrics": {
+        "reference": {
+          "path": "/workspace/dataset/ai/ai_easy_01.mkv",
+          "codec_name": "ffv1",
+          "width": 1280,
+          "height": 720,
+          "pix_fmt": "yuv420p",
+          "r_frame_rate": "24/1",
+          "avg_frame_rate": "24/1",
+          "nb_frames": 121,
+          "color_space": "bt709",
+          "color_primaries": null,
+          "color_transfer": null,
+          "color_range": "tv",
+          "duration": null,
+          "fps": 24.0,
+          "fps_fraction": "24"
+        },
+        "candidate": {
+          "path": "work/final_e2e_crf/output/0000000000000000000000000000000000000000000000000000000000000000",
+          "codec_name": "av1",
+          "width": 1280,
+          "height": 720,
+          "pix_fmt": "yuv420p",
+          "r_frame_rate": "24/1",
+          "avg_frame_rate": "24/1",
+          "nb_frames": 121,
+          "color_space": "bt709",
+          "color_primaries": null,
+          "color_transfer": null,
+          "color_range": "tv",
+          "duration": 5.041667,
+          "fps": 24.0,
+          "fps_fraction": "24"
+        },
+        "candidate_bytes": 642428,
+        "target_kbps": 1105.92,
+        "streaming": {
+          "avg_kbps": 1017.0842975206612,
+          "peak_kbps": 1415.264,
+          "max_keyframe_interval_seconds": 2.0,
+          "first_frame_is_keyframe": true,
+          "keyframes": 3,
+          "packets": 121
+        },
+        "canonicalized": true,
+        "vmaf": 96.986017,
+        "vmaf_neg": 95.793137,
+        "vmaf_delta": 1.1928800000000024,
+        "clip_score": 0.924650425,
+        "libvmaf_version": "f712fa7",
+        "perceptual": [
+          {
+            "name": "tone_manipulation",
+            "passed": true,
+            "measure": 0.0053834603502870655,
+            "limit": 1.0,
+            "detail": "CPU tone check: normalized deviation 0.005383; mean delta 0.000323/0.060000, luma-std delta 0.000050/0.080000"
+          },
+          {
+            "name": "color_grayscale",
+            "passed": true,
+            "measure": 1.0,
+            "limit": null,
+            "detail": "CPU grayscale check: reference is naturally low-chroma (0.021691 < 0.030000)"
+          },
+          {
+            "name": "chroma_uv",
+            "passed": true,
+            "measure": 1.0,
+            "limit": 1.0,
+            "detail": "CPU chroma check: normalized deviation 1.000000; chroma MAE 0.000978/0.100000, energy ratio 1.000000 in [0.400000, 1.800000]"
+          }
+        ]
+      },
+      "clip_score": 0.924650425,
+      "ok": true
+    },
+    {
+      "name": "0000000000000000000000000000000000000000000000000000000000000001",
+      "ref": "/workspace/dataset/render/rnd_easy_02.mkv",
+      "exists": true,
+      "passed": true,
+      "violations": [],
+      "metrics": {
+        "reference": {
+          "path": "/workspace/dataset/render/rnd_easy_02.mkv",
+          "codec_name": "ffv1",
+          "width": 1280,
+          "height": 720,
+          "pix_fmt": "yuv420p",
+          "r_frame_rate": "24/1",
+          "avg_frame_rate": "24/1",
+          "nb_frames": 144,
+          "color_space": "bt709",
+          "color_primaries": null,
+          "color_transfer": null,
+          "color_range": "tv",
+          "duration": null,
+          "fps": 24.0,
+          "fps_fraction": "24"
+        },
+        "candidate": {
+          "path": "work/final_e2e_crf/output/0000000000000000000000000000000000000000000000000000000000000001",
+          "codec_name": "av1",
+          "width": 1280,
+          "height": 720,
+          "pix_fmt": "yuv420p",
+          "r_frame_rate": "24/1",
+          "avg_frame_rate": "24/1",
+          "nb_frames": 144,
+          "color_space": "bt709",
+          "color_primaries": null,
+          "color_transfer": null,
+          "color_range": "tv",
+          "duration": 6.0,
+          "fps": 24.0,
+          "fps_fraction": "24"
+        },
+        "candidate_bytes": 774754,
+        "target_kbps": 1105.92,
+        "streaming": {
+          "avg_kbps": 1030.8933333333334,
+          "peak_kbps": 1042.452,
+          "max_keyframe_interval_seconds": 2.0,
+          "first_frame_is_keyframe": true,
+          "keyframes": 3,
+          "packets": 144
+        },
+        "canonicalized": true,
+        "vmaf": 96.790028,
+        "vmaf_neg": 95.825833,
+        "vmaf_delta": 0.9641950000000037,
+        "clip_score": 0.9197507000000001,
+        "libvmaf_version": "f712fa7",
+        "perceptual": [
+          {
+            "name": "tone_manipulation",
+            "passed": true,
+            "measure": 0.0011042390452893278,
+            "limit": 1.0,
+            "detail": "CPU tone check: normalized deviation 0.001104; mean delta 0.000044/0.060000, luma-std delta 0.000088/0.080000"
+          },
+          {
+            "name": "color_grayscale",
+            "passed": true,
+            "measure": 1.0008211687549562,
+            "limit": 0.35,
+            "detail": "CPU grayscale check: candidate/reference chroma-energy ratio 1.000821, minimum 0.350000"
+          },
+          {
+            "name": "chroma_uv",
+            "passed": true,
+            "measure": 1.0,
+            "limit": 1.0,
+            "detail": "CPU chroma check: normalized deviation 1.000000; chroma MAE 0.000310/0.100000, energy ratio 1.000821 in [0.400000, 1.800000]"
+          }
+        ]
+      },
+      "clip_score": 0.9197507000000001,
+      "ok": true
+    },
+    {
+      "name": "0000000000000000000000000000000000000000000000000000000000000002",
+      "ref": "/workspace/dataset/screen/scr_easy_05.mkv",
+      "exists": true,
+      "passed": true,
+      "violations": [],
+      "metrics": {
+        "reference": {
+          "path": "/workspace/dataset/screen/scr_easy_05.mkv",
+          "codec_name": "ffv1",
+          "width": 1280,
+          "height": 720,
+          "pix_fmt": "yuv420p",
+          "r_frame_rate": "30/1",
+          "avg_frame_rate": "30/1",
+          "nb_frames": 180,
+          "color_space": "bt709",
+          "color_primaries": null,
+          "color_transfer": null,
+          "color_range": "tv",
+          "duration": null,
+          "fps": 30.0,
+          "fps_fraction": "30"
+        },
+        "candidate": {
+          "path": "work/final_e2e_crf/output/0000000000000000000000000000000000000000000000000000000000000002",
+          "codec_name": "av1",
+          "width": 1280,
+          "height": 720,
+          "pix_fmt": "yuv420p",
+          "r_frame_rate": "30/1",
+          "avg_frame_rate": "30/1",
+          "nb_frames": 180,
+          "color_space": "bt709",
+          "color_primaries": null,
+          "color_transfer": null,
+          "color_range": "tv",
+          "duration": 6.0,
+          "fps": 30.0,
+          "fps_fraction": "30"
+        },
+        "candidate_bytes": 45916,
+        "target_kbps": 1382.4,
+        "streaming": {
+          "avg_kbps": 58.89066666666666,
+          "peak_kbps": 78.748,
+          "max_keyframe_interval_seconds": 2.0000003333333334,
+          "first_frame_is_keyframe": true,
+          "keyframes": 3,
+          "packets": 180
+        },
+        "canonicalized": true,
+        "vmaf": 97.428984,
+        "vmaf_neg": 97.427276,
+        "vmaf_delta": 0.0017079999999936035,
+        "clip_score": 0.9357246,
+        "libvmaf_version": "f712fa7",
+        "perceptual": [
+          {
+            "name": "tone_manipulation",
+            "passed": true,
+            "measure": 2.3210048873904127e-05,
+            "limit": 1.0,
+            "detail": "CPU tone check: normalized deviation 0.000023; mean delta 0.000000/0.060000, luma-std delta 0.000002/0.080000"
+          },
+          {
+            "name": "color_grayscale",
+            "passed": true,
+            "measure": 1.0,
+            "limit": null,
+            "detail": "CPU grayscale check: reference is naturally low-chroma (0.005875 < 0.030000)"
+          },
+          {
+            "name": "chroma_uv",
+            "passed": true,
+            "measure": 1.0,
+            "limit": 1.0,
+            "detail": "CPU chroma check: normalized deviation 1.000000; chroma MAE 0.000000/0.100000, energy ratio 1.000000 in [0.400000, 1.800000]"
+          }
+        ]
+      },
+      "clip_score": 0.9357246,
+      "ok": true
+    },
+    {
+      "name": "0000000000000000000000000000000000000000000000000000000000000003",
+      "ref": "/workspace/dataset/ai/ai_hard_06.mkv",
+      "exists": true,
+      "passed": true,
+      "violations": [],
+      "metrics": {
+        "reference": {
+          "path": "/workspace/dataset/ai/ai_hard_06.mkv",
+          "codec_name": "ffv1",
+          "width": 1280,
+          "height": 720,
+          "pix_fmt": "yuv420p",
+          "r_frame_rate": "24/1",
+          "avg_frame_rate": "24/1",
+          "nb_frames": 121,
+          "color_space": "bt709",
+          "color_primaries": null,
+          "color_transfer": null,
+          "color_range": "tv",
+          "duration": null,
+          "fps": 24.0,
+          "fps_fraction": "24"
+        },
+        "candidate": {
+          "path": "work/final_e2e_crf/output/0000000000000000000000000000000000000000000000000000000000000003",
+          "codec_name": "av1",
+          "width": 1280,
+          "height": 720,
+          "pix_fmt": "yuv420p",
+          "r_frame_rate": "24/1",
+          "avg_frame_rate": "24/1",
+          "nb_frames": 121,
+          "color_space": "bt709",
+          "color_primaries": null,
+          "color_transfer": null,
+          "color_range": "tv",
+          "duration": 5.041667,
+          "fps": 24.0,
+          "fps_fraction": "24"
+        },
+        "candidate_bytes": 673635,
+        "target_kbps": 1105.92,
+        "streaming": {
+          "avg_kbps": 1066.6028429752064,
+          "peak_kbps": 1048.172,
+          "max_keyframe_interval_seconds": 2.0,
+          "first_frame_is_keyframe": true,
+          "keyframes": 3,
+          "packets": 121
+        },
+        "canonicalized": true,
+        "vmaf": 86.0891,
+        "vmaf_neg": 83.801436,
+        "vmaf_delta": 2.2876640000000066,
+        "clip_score": 0.6522275000000001,
+        "libvmaf_version": "f712fa7",
+        "perceptual": [
+          {
+            "name": "tone_manipulation",
+            "passed": true,
+            "measure": 0.006442714771578116,
+            "limit": 1.0,
+            "detail": "CPU tone check: normalized deviation 0.006443; mean delta 0.000071/0.060000, luma-std delta 0.000515/0.080000"
+          },
+          {
+            "name": "color_grayscale",
+            "passed": true,
+            "measure": 0.9889225752589951,
+            "limit": 0.35,
+            "detail": "CPU grayscale check: candidate/reference chroma-energy ratio 0.988923, minimum 0.350000"
+          },
+          {
+            "name": "chroma_uv",
+            "passed": true,
+            "measure": 1.0,
+            "limit": 1.0,
+            "detail": "CPU chroma check: normalized deviation 1.000000; chroma MAE 0.003983/0.100000, energy ratio 0.988923 in [0.400000, 1.800000]"
+          }
+        ]
+      },
+      "clip_score": 0.6522275000000001,
+      "ok": true
+    }
+  ],
+  "pass": true
+}

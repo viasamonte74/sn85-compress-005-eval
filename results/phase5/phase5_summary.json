@@ -1,0 +1,97 @@
+{
+  "n_clips_sampled": 18,
+  "n_clips_full_compare": 12,
+  "max_samples": 24,
+  "max_width": 640,
+  "feature_names": [
+    "spatial_complexity",
+    "temporal_complexity",
+    "edge_density",
+    "frame_diff_mean",
+    "frame_diff_std",
+    "frame_diff_p95",
+    "repeated_frame_ratio",
+    "motion_complexity",
+    "texture_complexity",
+    "smooth_gradient_ratio",
+    "chroma_complexity",
+    "temporal_instability"
+  ],
+  "sampled_runtime": {
+    "mean_seconds": 0.45492827039561234,
+    "p50_seconds": 0.38043247151654214,
+    "p95_seconds": 0.969375216186745,
+    "mean_seconds_per_source_frame": 0.0024835463977365387,
+    "extrapolated_3428_frames_seconds": 8.513597051440854
+  },
+  "sampled_vs_full": {
+    "mean_pearson_corr": 0.8481476869581958,
+    "mean_mae": 0.2240419236934402,
+    "mean_rel_err": 1.2939536640115024,
+    "mean_speedup": 4.531332644412388,
+    "min_pearson_corr": 0.15941891773980352,
+    "worth_full_frame": true,
+    "recommendation": "consider_full_or_more_samples",
+    "mean_abs_err_by_feature": {
+      "spatial_complexity": 0.06870932457216344,
+      "temporal_complexity": 0.003854627040292026,
+      "edge_density": 0.00018445999803170003,
+      "frame_diff_mean": 0.9829298952744665,
+      "frame_diff_std": 0.14837121621480986,
+      "frame_diff_p95": 0.987239963064591,
+      "repeated_frame_ratio": 0.3471827387588257,
+      "motion_complexity": 0.0038855522796261855,
+      "texture_complexity": 0.0009541307484643274,
+      "smooth_gradient_ratio": 0.0006291656432786304,
+      "chroma_complexity": 0.0001829953471261843,
+      "temporal_instability": 0.14437901537960648
+    }
+  },
+  "feature_means_by_kind": [
+    {
+      "kind": "ai",
+      "spatial_complexity": 4.960724026548757,
+      "temporal_complexity": 0.025552060932310577,
+      "edge_density": 0.039111517581569666,
+      "frame_diff_mean": 6.515775537739198,
+      "frame_diff_std": 0.6706793535503399,
+      "frame_diff_p95": 7.55035609950622,
+      "repeated_frame_ratio": 0.20000000000000004,
+      "motion_complexity": 0.025900844722248923,
+      "texture_complexity": 0.4200670725612638,
+      "smooth_gradient_ratio": 0.6913457272376543,
+      "chroma_complexity": 0.15545284753990554,
+      "temporal_instability": 0.15582181421391636
+    },
+    {
+      "kind": "render",
+      "spatial_complexity": 2.0068541351986173,
+      "temporal_complexity": 0.025142070070544652,
+      "edge_density": 0.03835267194419283,
+      "frame_diff_mean": 6.411227867988887,
+      "frame_diff_std": 0.3533757636125759,
+      "frame_diff_p95": 6.912379417320093,
+      "repeated_frame_ratio": 0.16666666666666666,
+      "motion_complexity": 0.025173616380987834,
+      "texture_complexity": 0.21064055142980795,
+      "smooth_gradient_ratio": 0.7666621861685622,
+      "chroma_complexity": 0.16563052630753836,
+      "temporal_instability": 0.09222206436202225
+    },
+    {
+      "kind": "screen",
+      "spatial_complexity": 14.645222835934836,
+      "temporal_complexity": 0.01836754751081268,
+      "edge_density": 0.05009364752121914,
+      "frame_diff_mean": 4.683724615257233,
+      "frame_diff_std": 1.0625651295068967,
+      "frame_diff_p95": 5.8230390500898155,
+      "repeated_frame_ratio": 0.2246376811594203,
+      "motion_complexity": 0.01831034864087575,
+      "texture_complexity": 0.3854471517207776,
+      "smooth_gradient_ratio": 0.8753831500771606,
+      "chroma_complexity": 0.019922855290133157,
+      "temporal_instability": 0.2916321658583858
+    }
+  ]
+}

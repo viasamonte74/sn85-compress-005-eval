@@ -1,0 +1,119 @@
+{
+  "root": "/workspace/dataset",
+  "exists": true,
+  "mkv_by_subdir": {
+    "ai": 46,
+    "ai1080": 46,
+    "render": 44,
+    "screen": 43
+  },
+  "manifest": {
+    "entries": 58,
+    "by_kind": {
+      "ai": 35,
+      "screen": 23
+    },
+    "by_split": {
+      "train": 47,
+      "test": 11
+    },
+    "by_resolution": {
+      "1280x720": 45,
+      "1920x1080": 13
+    },
+    "fps_values": [
+      24.0,
+      25.0,
+      30.0,
+      50.0,
+      60.0
+    ],
+    "note": "manifest.jsonl may lag newly added clips; use mkv_by_subdir for on-disk count"
+  },
+  "samples": [
+    {
+      "path": "/workspace/dataset/ai/ai_easy_01.mkv",
+      "codec_name": "ffv1",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "r_frame_rate": "24/1",
+      "avg_frame_rate": "24/1",
+      "nb_frames": 121,
+      "color_space": "bt709",
+      "color_primaries": null,
+      "color_transfer": null,
+      "color_range": "tv",
+      "duration": null,
+      "fps": 24.0,
+      "fps_fraction": "24",
+      "target_kbps": 1105.92,
+      "average_limit_kbps": 1116.9792,
+      "peak_limit_kbps": 1658.88,
+      "gop_frames_2s": 48
+    },
+    {
+      "path": "/workspace/dataset/ai1080/ai_easy_01_1080.mkv",
+      "codec_name": "ffv1",
+      "width": 1920,
+      "height": 1080,
+      "pix_fmt": "yuv420p",
+      "r_frame_rate": "24/1",
+      "avg_frame_rate": "24/1",
+      "nb_frames": 121,
+      "color_space": "bt709",
+      "color_primaries": null,
+      "color_transfer": null,
+      "color_range": "tv",
+      "duration": null,
+      "fps": 24.0,
+      "fps_fraction": "24",
+      "target_kbps": 2488.32,
+      "average_limit_kbps": 2513.2032000000004,
+      "peak_limit_kbps": 3732.4800000000005,
+      "gop_frames_2s": 48
+    },
+    {
+      "path": "/workspace/dataset/render/rnd_easy_01.mkv",
+      "codec_name": "ffv1",
+      "width": 1920,
+      "height": 1080,
+      "pix_fmt": "yuv420p",
+      "r_frame_rate": "30/1",
+      "avg_frame_rate": "30/1",
+      "nb_frames": 240,
+      "color_space": "bt709",
+      "color_primaries": null,
+      "color_transfer": null,
+      "color_range": "tv",
+      "duration": null,
+      "fps": 30.0,
+      "fps_fraction": "30",
+      "target_kbps": 3110.4,
+      "average_limit_kbps": 3141.504,
+      "peak_limit_kbps": 4665.6,
+      "gop_frames_2s": 60
+    },
+    {
+      "path": "/workspace/dataset/screen/scr_easy_01.mkv",
+      "codec_name": "ffv1",
+      "width": 1920,
+      "height": 1080,
+      "pix_fmt": "yuv420p",
+      "r_frame_rate": "30/1",
+      "avg_frame_rate": "30/1",
+      "nb_frames": 240,
+      "color_space": "bt709",
+      "color_primaries": null,
+      "color_transfer": null,
+      "color_range": "tv",
+      "duration": null,
+      "fps": 30.0,
+      "fps_fraction": "30",
+      "target_kbps": 3110.4,
+      "average_limit_kbps": 3141.504,
+      "peak_limit_kbps": 4665.6,
+      "gop_frames_2s": 60
+    }
+  ]
+}

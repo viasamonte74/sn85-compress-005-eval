@@ -1,0 +1,72 @@
+{
+ "ai_hard_10_1080": {
+  "arm": "svt_crf_p4_qm_la_lqb",
+  "gain": 0.47,
+  "path": "/workspace/dataset/ai1080/ai_hard_10_1080.mkv"
+ },
+ "ai_hard_22": {
+  "arm": "svt_crf_p5_qm_la",
+  "gain": 2.61,
+  "path": "/workspace/dataset/ai/ai_hard_22.mkv"
+ },
+ "aix_hard_019": {
+  "arm": "svt_crf_p3_qm_la",
+  "gain": -0.03,
+  "path": "/workspace/dataset/ai_gen2/aix_hard_019.mkv"
+ },
+ "ai_hard_21": {
+  "arm": "svt_crf_p6_qm_la",
+  "gain": 1.04,
+  "path": "/workspace/dataset/ai/ai_hard_21.mkv"
+ },
+ "anim_hard_007_1080": {
+  "arm": "svt_crf_p5_qm_la",
+  "gain": -0.09,
+  "path": "/workspace/dataset/ai_gen2/anim_hard_007_1080.mkv"
+ },
+ "ai_hard_21_1080": {
+  "arm": "svt_crf_p3_qm_la",
+  "gain": 3.08,
+  "path": "/workspace/dataset/ai1080/ai_hard_21_1080.mkv"
+ },
+ "anim_hard_011_1080": {
+  "arm": "svt_crf_p5_qm_la",
+  "gain": 0.72,
+  "path": "/workspace/dataset/ai_gen2/anim_hard_011_1080.mkv"
+ },
+ "anim_hard_017_1080": {
+  "arm": "svt_crf_p3_qm_la",
+  "gain": -2.57,
+  "path": "/workspace/dataset/ai_gen2/anim_hard_017_1080.mkv"
+ },
+ "aig3_medium_004_1080": {
+  "arm": "svt_crf_p6_qm_la",
+  "gain": 0.15,
+  "path": "/workspace/dataset/ai_gen3/aig3_medium_004_1080.mkv"
+ },
+ "anim_hard_007_i60_1080": {
+  "arm": "svt_crf_p4_qm_la_lqb",
+  "gain": 0.36,
+  "path": "/workspace/dataset/hfr_ai/anim_hard_007_i60_1080.mkv"
+ },
+ "hfr_rnd_hard_03": {
+  "arm": "svt_crf_p2_qm_la",
+  "gain": 0.03,
+  "path": "/workspace/dataset/hfr_render/hfr_rnd_hard_03.mkv"
+ },
+ "anim_hard_002_1080": {
+  "arm": "svt_crf_p3_qm_la",
+  "gain": -5.92,
+  "path": "/workspace/dataset/ai_gen2/anim_hard_002_1080.mkv"
+ },
+ "anim_hard_009_1080": {
+  "arm": "svt_crf_p3_qm_la",
+  "gain": -0.4,
+  "path": "/workspace/dataset/ai_gen2/anim_hard_009_1080.mkv"
+ },
+ "anim_hard_013_1080": {
+  "arm": "svt_crf_p3_qm_la",
+  "gain": -0.47,
+  "path": "/workspace/dataset/ai_gen2/anim_hard_013_1080.mkv"
+ }
+}

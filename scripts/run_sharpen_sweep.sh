@@ -1,0 +1,3 @@
+#!/bin/bash
+# sharpening sweep stage 1 (2026-11-11): p4 base + luma unsharp / cas strengths on three zero-score 1080p AI clips
+exec /workspace/sn85-compression-005/scripts/run_hard_rescue_sweep.sh --workers 6 --clips ai_hard_12_1080,ai_hard_20_1080,ai_hard_04_1080 --configs svt_crf_p4_qm_la+usm10,svt_crf_p4_qm_la+usm20,svt_crf_p4_qm_la+usm30,svt_crf_p4_qm_la+usm40,svt_crf_p4_qm_la+usm3_30,svt_crf_p4_qm_la+usm7_20,svt_crf_p4_qm_la+cas20,svt_crf_p4_qm_la+cas40,svt_crf_p4_qm_la+ds67_usm10,svt_crf_p4_qm_la+ds67_usm20,svt_crf_p4_qm_la+ds67_usm30,svt_crf_p4_qm_la+ds67_usm40,svt_crf_p4_qm_la+ds85_usm10,svt_crf_p4_qm_la+ds85_usm20,svt_crf_p4_qm_la+ds85_usm30,svt_crf_p4_qm_la+ds85_usm40,svt_crf_p4_qm_la+ds67_usm

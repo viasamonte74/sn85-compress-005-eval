@@ -1,0 +1,113 @@
+{
+  "implemented": {
+    "hard_adapt_plan": "regime \u2192 config + prefilter; salvage denoise on streaming fail",
+    "filters": [
+      "hard_denoise",
+      "hqdn3d_hard",
+      "atadenoise_hard"
+    ],
+    "pipeline": "process_item(hard_adapt=True) primary + salvage; hard_dual optional",
+    "primary_prefilter_policy": "hard_denoise only if bitrate_incompressible; else none"
+  },
+  "ab_original_n10": {
+    "note": "first A/B used hqdn3d_light on noisy_hf (hurt ai_hard_06 score)",
+    "deltas_vs_baseline": [
+      {
+        "arm": "adapted",
+        "delta_score": -0.0013905800000000037,
+        "delta_vmaf": 0.015651285714284313,
+        "delta_ok_rate": 0.1
+      },
+      {
+        "arm": "adapted_dual",
+        "delta_score": -0.0008508825000000011,
+        "delta_vmaf": -1.0342020000000016,
+        "delta_ok_rate": 0.1
+      }
+    ],
+    "arms": [
+      {
+        "arm": "baseline",
+        "mean_vmaf": 42.902217285714286,
+        "mean_score": 0.008354042499999999,
+        "pass_rate": 0.7,
+        "ok_rate": 0.7,
+        "mean_encode_s": 21.975000550376716,
+        "n": 10
+      },
+      {
+        "arm": "adapted_dual",
+        "mean_vmaf": 40.149240875,
+        "mean_score": 0.0075031599999999974,
+        "pass_rate": 0.8,
+        "ok_rate": 0.8,
+        "mean_encode_s": 38.29597678757273,
+        "n": 10
+      },
+      {
+        "arm": "adapted",
+        "mean_vmaf": 41.07189875,
+        "mean_score": 0.006963462499999995,
+        "pass_rate": 0.8,
+        "ok_rate": 0.8,
+        "mean_encode_s": 33.36731174492161,
+        "n": 10
+      }
+    ],
+    "verdict": "adapted raises streaming pass rate; VMAF/score still near floor"
+  },
+  "recheck_fixed_policy": {
+    "clips": [
+      {
+        "clip": "ai_hard_06",
+        "baseline_ok": true,
+        "adapted_ok": true,
+        "baseline_score": 0.08416014999999995,
+        "adapted_score": 0.08020774999999994,
+        "baseline_vmaf": 63.366406,
+        "adapted_vmaf": 63.20831,
+        "salvage": false
+      },
+      {
+        "clip": "gen_hard_01_grain_ai_hard_13",
+        "baseline_ok": false,
+        "adapted_ok": true,
+        "baseline_score": 0.0,
+        "adapted_score": 0.0,
+        "baseline_vmaf": null,
+        "adapted_vmaf": 28.15011,
+        "salvage": true
+      },
+      {
+        "clip": "ai_hard_12",
+        "baseline_ok": true,
+        "adapted_ok": true,
+        "baseline_score": 0.0,
+        "adapted_score": 0.0,
+        "baseline_vmaf": 44.202713,
+        "adapted_vmaf": 44.407657,
+        "salvage": false
+      },
+      {
+        "clip": "rnd_hard_06",
+        "baseline_ok": true,
+        "adapted_ok": true,
+        "baseline_score": 0.0,
+        "adapted_score": 0.0,
+        "baseline_vmaf": 54.478208,
+        "adapted_vmaf": 54.178982,
+        "salvage": false
+      }
+    ],
+    "findings": [
+      "ai_hard_06 stays score\u22480.08 with pf=none (encode noise \u00b10.004)",
+      "gen_hard_01_grain: baseline streaming fail \u2192 adapted salvage pass (VMAF\u224828, score still 0)",
+      "ai_hard_12 / rnd_hard_06: VMAF flat within noise"
+    ]
+  },
+  "verdict": "Hard-adapt salvage raises streaming pass rate on some hard clips; clip_score floor remains (VMAF\u226a60). Do not denoise noisy_hf primary. Net competition mean gain is small until hard VMAF crosses 60.",
+  "artifacts": {
+    "ab_csv": "results/hard_adapt/hard_adapt_ab.csv",
+    "recheck": "results/hard_adapt/hard_adapt_recheck.json"
+  }
+}

@@ -1,0 +1,3 @@
+file '/workspace/sn85-compression-005/results/user_tests/gopmix/seg_mix2_s0.ivf'
+file '/workspace/sn85-compression-005/results/user_tests/gopmix/seg_mix2_s1.ivf'
+file '/workspace/sn85-compression-005/results/user_tests/gopmix/seg_mix2_s2.ivf'
