@@ -1,6 +1,6 @@
 # sn85-compression-005
 
-VidAIO **Streaming compression 005** contender, version `1.0.0rc5` (`streamenc/__init__.py`).
+VidAIO **Streaming compression 005** contender, version `1.0.0rc7` (`streamenc/__init__.py`).
 
 ## Official contract
 
@@ -35,7 +35,9 @@ a safe encode instead of aborting the batch.
    the cap (kept only if the measured join is valid). When a join is further over the cap than the shortest segment
    can still absorb, the other segments move up 1-2 quarter steps at once instead of after two futile retries.
 5. **Hard clips** (predicted best VMAF < 80): chroma box blur (radius 4) and an 85 % down/up low-pass before
-   encoding. No sharpening or contrast change anywhere.
+   encoding. Clips that look like practice q08 (predicted best < 70, at most 720p, and cheap to encode: mean pilot
+   CPU <= 0.08 s per megapixel-frame) use SVT-AV1 preset 2 with 3 hierarchy levels and a radius-16 chroma blur
+   instead (q08: 60.13 -> 61.23 VMAF). No sharpening or contrast change anywhere.
 6. **Guards**: every output is measured with the validator's own packet rules (average, 2 s peak,
    keyframes, frame count). When the model expects a possible VMAF-NEG gap problem, the gap is measured with
    libvmaf (`vmaf_v0.6.1` / `vmaf_v0.6.1neg`) and a safer setting is encoded if needed. The check decodes with 8
@@ -53,9 +55,10 @@ the measurement is the validator's (ffprobe packet sizes over the reference fram
 
 | Set | Clips | Quality | Time per 3,428 frames | Final |
 | --- | --- | --- | --- | --- |
-| Public practice pack, 4-clip batches like the validator | 8 | 0.7637 | 105.3 s | 0.7637 |
+| Public practice pack, 4-clip batches like the validator | 8 | 0.7672 | 111.1 s | 0.7672 |
 | Public practice pack, one `run.sh` call (1.0.0rc2) | 8 | 0.7637 | 104.2 s | 0.7637 |
-| Held-out AI / render / screen clips, 4-clip batches (eval model without those clips) | 65 | 0.6430 | 163.6 s | 0.6260 |
+| Held-out AI / render / screen clips, 4-clip batches (eval model without those clips) | 65 | 0.6430 | 163.8 s | 0.6260 |
+| Held-out AI clips by tier, 4-clip batches: easy / medium / hard | 6 / 6 / 41 | 0.8841 / 0.6193 / 0.4407 | 159.9 / 166.3 / 245.3 s | 0.8623 / 0.6023 / 0.4160 |
 | Held-out clips, one `run.sh` call per list (1.0.0rc2) | 65 | 0.6430 | 146.5 s | 0.6313 |
 
 "4-clip batches" means a fresh `run.sh` per consecutive group of 4 clips with the batch times summed, which is how

@@ -150,7 +150,21 @@ HARD_VMAF = float(os.environ.get("STREAMENC_HARD_VMAF", "80"))
 HARD_PREFILTER = os.environ.get("STREAMENC_HARD_PREFILTER", "cblur4_ds85")
 # 2026-11-11 test option: on the hard path also force at least this (slower) preset, e.g. svt_crf_p2_qm_la. Practice
 # q08 p2 + cblur4_ds85 60.58 / p1 61.04 vs p3_lqb 59.56 (results/user_tests/q0708_study2.jsonl). "" = off.
-HARD_ARM = os.environ.get("STREAMENC_HARD_ARM", "")          # e.g. "cblur4_ds85"; "" = off
+# Hard-path arm upgrade, since 1.0.0rc6 (user yes 2026-11-12) ON for q08-like clips only (limits below); "" = off.
+HARD_ARM = os.environ.get("STREAMENC_HARD_ARM", "svt_crf_p2_qm_la_lqb_h3")
+# 2026-11-12 q08 follow-up (research, default off): apply HARD_ARM only to clips whose (stage 2) predicted best VMAF
+# is below this, and use this prefilter with it ("" = keep the hard prefilter). 2026-11-11: forcing p2/p1 on every
+# hard-path clip raised VMAF but cost more time than it gained.
+HARD_ARM_MAX_PRED = float(os.environ.get("STREAMENC_HARD_ARM_MAX_PRED", "70"))
+HARD_ARM_PREFILTER = os.environ.get("STREAMENC_HARD_ARM_PREFILTER", "cblur16_ds85")
+# q08-like clips only (user, 2026-11-12): the HARD_ARM gain is about constant (+0.6..+1.1 VMAF on p2) but its extra
+# time scales with how expensive the clip is to encode, and it lands on the batch wall whenever the clip is the batch's
+# slowest (aix_hard_019 +20 s, ai_hard_21_1080 +93 s at 1080p). Cap the cost: frame height <= this (0 = any) and mean
+# pilot CPU-seconds per megapixel-frame <= this (0 = any): q08 0.0741 vs aix_hard_019 0.0881.
+HARD_ARM_MAX_HEIGHT = int(os.environ.get("STREAMENC_HARD_ARM_MAX_HEIGHT", "720"))
+HARD_ARM_MAX_PILOT_CPU = float(os.environ.get("STREAMENC_HARD_ARM_MAX_PILOT_CPU", "0.08"))
+# e2e 4-clip batches (H2c): practice q08 60.13 -> 61.23 VMAF, quality 0.7637 -> 0.7672 (110.4 s); held-out 65 clips
+# byte-identical (no clip qualifies). The 0.08 pilot-CPU limit is fitted on few clips and depends on the CPU type.
 # Segment fill: CRF moves in quarter steps (~3-5 % bitrate each on hard clips), so the final encode often lands at
 # 94-97.5 % of the budget. Re-encode a subset of keyframe segments (GOPs) one quarter step lower and splice them in
 # (q08: whole 55.5 = 97.46 % / VMAF 59.52; segments 55.25/55.5/55.5 = 99.20 % / 60.01; segment encodes are
@@ -1032,9 +1046,20 @@ def encode_item_crf(
                 easy = plan.pred_vmaf is not None and plan.pred_vmaf >= EASY_VMAF and not plan.hopeless
                 final_aim = FINAL_AIM_EASY if easy else FINAL_AIM
                 pilot_aim = final_aim * math.exp(-_ratio(crf))
-            if hard_vf and HARD_ARM and not plan.hopeless and _preset(final_arm) > _preset(HARD_ARM):
-                hist.append({"tag": "hard_arm", "was": final_arm, "arm": HARD_ARM})
+            pil_cpu = [h_["cpu_seconds"] for h_ in hist if h_.get("tag") == "pilot" and "cpu_seconds" in h_]
+            pil_cpu_mpf = (sum(pil_cpu) / len(pil_cpu) / max(meta.width * meta.height * meta.nb_frames / 1e6, 1e-6)
+                           if pil_cpu else None)
+            cheap = ((not HARD_ARM_MAX_HEIGHT or meta.height <= HARD_ARM_MAX_HEIGHT)
+                     and (not HARD_ARM_MAX_PILOT_CPU or (pil_cpu_mpf is not None and pil_cpu_mpf <= HARD_ARM_MAX_PILOT_CPU)))
+            if (hard_vf and HARD_ARM and not plan.hopeless and _preset(final_arm) > _preset(HARD_ARM)
+                    and (plan.pred_best if plan.pred_best is not None else 0.0) < HARD_ARM_MAX_PRED and cheap):
+                hist.append({"tag": "hard_arm", "was": final_arm, "arm": HARD_ARM, "pred_best": plan.pred_best,
+                             "prefilter": HARD_ARM_PREFILTER or None,
+                             "pilot_cpu_mpf": None if pil_cpu_mpf is None else round(pil_cpu_mpf, 4)})
                 final_arm = HARD_ARM
+                if HARD_ARM_PREFILTER:
+                    from streamenc.filters.policy import filter_vf as _fvf2
+                    hard_vf = _fvf2(HARD_ARM_PREFILTER).format(w=meta.width, h=meta.height, fps=str(meta.fps_fraction))
                 if hasattr(plan, "ratio_fn_for"):  # p1 has no rate model: p2's bits are the closest proxy
                     ratio_fn = plan.ratio_fn_for(HARD_ARM if HARD_ARM in (plan.vmaf_by_arm or {}) else "svt_crf_p2_qm_la")
                 pilot_aim = final_aim * math.exp(-_ratio(crf))
@@ -1141,7 +1166,8 @@ def encode_item_crf(
             if p_fail is not None and p_fail >= NEG_CHECK_P:
                 g0 = _gap(best[0], chosen_id)
                 if g0 is not None and g0 > NEG_SAFE:
-                    tried = [(g0, best, chosen_id, hard_vf)]
+                  tried = [(g0, best, chosen_id, hard_vf)]
+                  try:  # 2026-11-12 (rc7): a failure in the fallback must never lose the valid encode
                     src_arm, src_crf = chosen_id, best[3]
                     pf_ok = False
                     if (hard_vf and NEG_PREFILTER_FALLBACK and NEG_PREFILTER_FALLBACK != HARD_PREFILTER
@@ -1164,7 +1190,7 @@ def encode_item_crf(
                             tried.append((gp if gp is not None else NEG_LIMIT + 1.0, pf_best, chosen_id, hard_vf))
                             pf_ok = gp is not None and gp <= NEG_SAFE
                     for alt in (() if pf_ok else NEG_SAFE_ARMS):
-                        if alt == chosen_id or alt in {a for _, _, a in tried}:
+                        if alt == chosen_id or alt in {a for _, _, a, _ in tried}:  # rc7 fix: 4-tuples (crashed rc1-rc6)
                             continue
                         if _remaining() < 2.0 * max((h.get("seconds", 0.0) for h in hist), default=0.0) + 5.0:
                             break
@@ -1177,8 +1203,10 @@ def encode_item_crf(
                         if ga is not None and ga <= NEG_SAFE:
                             break
                         src_arm, src_crf = alt, alt_best[3]
-                    g_ship, best, chosen_id, hard_vf = min(tried, key=lambda r: r[0])  # segfill uses the shipped filter
-                    neg_reason = f"neg_fallback gap {g0:.2f}->{g_ship:.2f}"
+                  except Exception as exc:  # noqa: BLE001 — ship the best encode tried so far
+                    hist.append({"tag": "neg_fallback", "error": str(exc)[-200:]})
+                  g_ship, best, chosen_id, hard_vf = min(tried, key=lambda r: r[0])  # segfill uses the shipped filter
+                  neg_reason = f"neg_fallback gap {g0:.2f}->{g_ship:.2f}"
         if SEGFILL and not plan.hopeless and get_arm(chosen_id).get("rc") == "crf":
             try:
                 best = _segment_fill(best, chosen_id, neg_checked=bool(neg_reason) or any(

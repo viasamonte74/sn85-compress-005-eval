@@ -1,0 +1,166 @@
+{
+ "batches": [
+  {
+   "batch": 0,
+   "list": "e2e_test26_nonat",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 25.991
+  },
+  {
+   "batch": 1,
+   "list": "e2e_test26_nonat",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 38.988
+  },
+  {
+   "batch": 2,
+   "list": "e2e_test26_nonat",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 33.113
+  },
+  {
+   "batch": 3,
+   "list": "e2e_test26_nonat",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 23.513
+  },
+  {
+   "batch": 4,
+   "list": "e2e_test26_nonat",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 28.678
+  },
+  {
+   "batch": 5,
+   "list": "e2e_ai1080_nonat",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 38.07
+  },
+  {
+   "batch": 6,
+   "list": "e2e_ai1080_nonat",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 23.55
+  },
+  {
+   "batch": 7,
+   "list": "e2e_ai1080_nonat",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 40.874
+  },
+  {
+   "batch": 8,
+   "list": "e2e_ai1080_nonat",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 43.893
+  },
+  {
+   "batch": 9,
+   "list": "e2e_ai1080_nonat",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 27.647
+  },
+  {
+   "batch": 10,
+   "list": "e2e_ai1080_nonat",
+   "n": 3,
+   "rc": 0,
+   "wall_seconds": 59.094
+  },
+  {
+   "batch": 11,
+   "list": "e2e_hfr_nonat",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 68.324
+  },
+  {
+   "batch": 12,
+   "list": "e2e_hfr_nonat",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 44.023
+  },
+  {
+   "batch": 13,
+   "list": "e2e_hfr_nonat",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 64.672
+  },
+  {
+   "batch": 14,
+   "list": "e2e_hfr_nonat",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 21.658
+  },
+  {
+   "batch": 15,
+   "list": "e2e_hfr_nonat",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 16.926
+  },
+  {
+   "batch": 16,
+   "list": "e2e_hfr_nonat",
+   "n": 2,
+   "rc": 0,
+   "wall_seconds": 11.953
+  }
+ ],
+ "all": {
+  "n": 65,
+  "frames": 12800,
+  "wall_seconds": 610.97,
+  "runtime_3428": 163.6,
+  "speed": 0.9123,
+  "quality": 0.643,
+  "final": 0.626,
+  "n_passed": 64
+ },
+ "e2e_test26_nonat": {
+  "n": 20,
+  "frames": 3321,
+  "wall_seconds": 150.28,
+  "runtime_3428": 155.1,
+  "speed": 0.9253,
+  "quality": 0.6199,
+  "final": 0.606,
+  "n_passed": 19
+ },
+ "e2e_ai1080_nonat": {
+  "n": 23,
+  "frames": 3273,
+  "wall_seconds": 233.13,
+  "runtime_3428": 244.2,
+  "speed": 0.8145,
+  "quality": 0.4983,
+  "final": 0.4706,
+  "n_passed": 23
+ },
+ "e2e_hfr_nonat": {
+  "n": 22,
+  "frames": 6206,
+  "wall_seconds": 227.56,
+  "runtime_3428": 125.7,
+  "speed": 0.9767,
+  "quality": 0.8152,
+  "final": 0.8095,
+  "n_passed": 22
+ },
+ "model": "models/crf_predictor_eval_c_abs.pkl",
+ "cpus": "0-31",
+ "batch": 4
+}

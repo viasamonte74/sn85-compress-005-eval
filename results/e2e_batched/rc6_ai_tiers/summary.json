@@ -1,0 +1,152 @@
+{
+ "batches": [
+  {
+   "batch": 0,
+   "list": "e2e_ai_test_easy",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 14.446
+  },
+  {
+   "batch": 1,
+   "list": "e2e_ai_test_easy",
+   "n": 2,
+   "rc": 0,
+   "wall_seconds": 19.442
+  },
+  {
+   "batch": 2,
+   "list": "e2e_ai_test_medium",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 23.166
+  },
+  {
+   "batch": 3,
+   "list": "e2e_ai_test_medium",
+   "n": 2,
+   "rc": 0,
+   "wall_seconds": 14.424
+  },
+  {
+   "batch": 4,
+   "list": "e2e_ai_test_hard",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 40.099
+  },
+  {
+   "batch": 5,
+   "list": "e2e_ai_test_hard",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 27.915
+  },
+  {
+   "batch": 6,
+   "list": "e2e_ai_test_hard",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 32.533
+  },
+  {
+   "batch": 7,
+   "list": "e2e_ai_test_hard",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 30.293
+  },
+  {
+   "batch": 8,
+   "list": "e2e_ai_test_hard",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 25.079
+  },
+  {
+   "batch": 9,
+   "list": "e2e_ai_test_hard",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 58.655
+  },
+  {
+   "batch": 10,
+   "list": "e2e_ai_test_hard",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 57.085
+  },
+  {
+   "batch": 11,
+   "list": "e2e_ai_test_hard",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 50.624
+  },
+  {
+   "batch": 12,
+   "list": "e2e_ai_test_hard",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 47.239
+  },
+  {
+   "batch": 13,
+   "list": "e2e_ai_test_hard",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 36.309
+  },
+  {
+   "batch": 14,
+   "list": "e2e_ai_test_hard",
+   "n": 1,
+   "rc": 0,
+   "wall_seconds": 11.729
+  }
+ ],
+ "all": {
+  "n": 53,
+  "frames": 7393,
+  "wall_seconds": 489.04,
+  "runtime_3428": 226.8,
+  "speed": 0.8326,
+  "quality": 0.5111,
+  "final": 0.4855,
+  "n_passed": 52
+ },
+ "e2e_ai_test_easy": {
+  "n": 6,
+  "frames": 726,
+  "wall_seconds": 33.89,
+  "runtime_3428": 160.0,
+  "speed": 0.9178,
+  "quality": 0.8841,
+  "final": 0.8623,
+  "n_passed": 6
+ },
+ "e2e_ai_test_medium": {
+  "n": 6,
+  "frames": 726,
+  "wall_seconds": 37.59,
+  "runtime_3428": 177.5,
+  "speed": 0.8924,
+  "quality": 0.6197,
+  "final": 0.5997,
+  "n_passed": 6
+ },
+ "e2e_ai_test_hard": {
+  "n": 41,
+  "frames": 5941,
+  "wall_seconds": 417.56,
+  "runtime_3428": 240.9,
+  "speed": 0.8178,
+  "quality": 0.4407,
+  "final": 0.4166,
+  "n_passed": 40
+ },
+ "model": "models/crf_predictor_eval_c_abs.pkl",
+ "cpus": "0-31",
+ "batch": 4
+}

@@ -42,6 +42,11 @@ ARMS: dict[str, dict[str, Any]] = {
                          "svt": {"tune": 1, "enable-qm": 1, "qm-min": 0, "lookahead": 120}},
     "svt_crf_p3_qm_la": {"codec": "libsvtav1", "rc": "crf", "preset": 3,
                          "svt": {"tune": 1, "enable-qm": 1, "qm-min": 0, "lookahead": 120}},
+    # 2026-11-12 q08 lab (research arm, used only via STREAMENC_HARD_ARM): preset 2 + luminance bias + 3 hierarchy
+    # levels (short reference chains suit chaotic motion): q08 whole clip 60.97 @ 98.8 % vs p3_lqb 60.15 @ 100.7 %.
+    "svt_crf_p2_qm_la_lqb_h3": {"codec": "libsvtav1", "rc": "crf", "preset": 2,
+                                "svt": {"tune": 1, "enable-qm": 1, "qm-min": 0, "lookahead": 120, "luminance-qp-bias": 5,
+                                        "hierarchical-levels": 3}},
     "svt_crf_p3_qm_la_lqb": {"codec": "libsvtav1", "rc": "crf", "preset": 3,
                              "svt": {"tune": 1, "enable-qm": 1, "qm-min": 0, "lookahead": 120, "luminance-qp-bias": 5}},
     "svt_crf_p4_qm_la_lqb": {"codec": "libsvtav1", "rc": "crf", "preset": 4,
