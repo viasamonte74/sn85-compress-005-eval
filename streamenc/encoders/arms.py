@@ -181,9 +181,10 @@ def get_arm(arm_id: str) -> dict[str, Any]:
     return ARMS[arm_id]
 
 
-def _head(inp: str, vf: str | None, binary: str) -> list[str]:
+def _head(inp: str, vf: str | None, binary: str, pre_vf: str | None = None) -> list[str]:
     a = [binary, "-hide_banner", "-nostdin", "-y", "-loglevel", "error", "-i", inp,
          "-map", "0:v:0", "-an", "-sn", "-dn", "-fps_mode", "passthrough"]
+    vf = ",".join(x for x in (pre_vf, vf) if x) or None   # pre_vf: relabel an untagged source (validate.vmaf.relabel_vf)
     if vf:
         a += ["-vf", vf]
     return a
@@ -195,7 +196,8 @@ def _tail(out: str, pix_fmt: str = "yuv420p") -> list[str]:
 
 
 def build_commands(arm: dict[str, Any], inp: str, out: str, kbps: float, gop: int, passlog: str,
-                   vf: str | None = None, threads: int = THREADS, crf: float | None = None) -> list[list[str]]:
+                   vf: str | None = None, threads: int = THREADS, crf: float | None = None,
+                   pre_vf: str | None = None) -> list[list[str]]:
     """``kbps`` is the VBR target (or the budget for a capped-CRF ``cap`` multiplier); ``crf`` is
     required when ``arm["rc"] == "crf"`` (constant quality, deterministic for lp > 1 unless capped)."""
     c = arm["codec"]
@@ -218,7 +220,7 @@ def build_commands(arm: dict[str, Any], inp: str, out: str, kbps: float, gop: in
             rc = rate
         enc = ["-c:v", c, "-preset", str(arm["preset"]), *rc, "-g", str(gop),
                "-svtav1-params", ":".join(f"{k}={v}" for k, v in svt.items())]
-        return [_head(inp, vf, binary) + enc + _tail(out, pix)]
+        return [_head(inp, vf, binary, pre_vf) + enc + _tail(out, pix)]
     if c in ("av1_nvenc", "hevc_nvenc"):
         aq = arm.get("aq", True)
         enc = ["-c:v", c, "-preset", arm["preset"], "-tune", arm["tune"], "-rc", "vbr", *rate, *vbv,
@@ -228,7 +230,7 @@ def build_commands(arm: dict[str, Any], inp: str, out: str, kbps: float, gop: in
         if "tf_level" in arm:
             enc += ["-tf_level", str(arm["tf_level"])]
         enc += [str(x) for x in arm.get("extra", [])]  # extra NVENC options (wide search, 2026-11-11)
-        return [_head(inp, vf, binary) + enc + _tail(out, pix)]
+        return [_head(inp, vf, binary, pre_vf) + enc + _tail(out, pix)]
 
     if c == "libaom-av1":
         aomp = {"enable-keyframe-filtering": 0, **arm.get("aom", {})}
@@ -245,8 +247,8 @@ def build_commands(arm: dict[str, Any], inp: str, out: str, kbps: float, gop: in
         if arm.get("tune"):
             common += ["-tune", arm["tune"]]
         params = ":".join(f"{k}={v}" for k, v in xp.items())
-        p1 = _head(inp, vf, binary) + common + ["-x265-params", params + ":pass=1", "-f", "null", "-"]
-        p2 = _head(inp, vf, binary) + common + ["-x265-params", params + ":pass=2"] + _tail(out, pix)
+        p1 = _head(inp, vf, binary, pre_vf) + common + ["-x265-params", params + ":pass=1", "-f", "null", "-"]
+        p2 = _head(inp, vf, binary, pre_vf) + common + ["-x265-params", params + ":pass=2"] + _tail(out, pix)
         return [p1, p2]
     elif c == "libvpx-vp9":
         common = ["-c:v", c, "-deadline", "good", "-cpu-used", str(arm["cpu"]), "-row-mt", "1",
@@ -259,6 +261,6 @@ def build_commands(arm: dict[str, Any], inp: str, out: str, kbps: float, gop: in
     else:
         raise ValueError(f"unsupported codec {c}")
 
-    p1 = _head(inp, vf, binary) + common + ["-pass", "1", "-passlogfile", passlog, "-f", "null", "-"]
-    p2 = _head(inp, vf, binary) + common + ["-pass", "2", "-passlogfile", passlog] + _tail(out, pix)
+    p1 = _head(inp, vf, binary, pre_vf) + common + ["-pass", "1", "-passlogfile", passlog, "-f", "null", "-"]
+    p2 = _head(inp, vf, binary, pre_vf) + common + ["-pass", "2", "-passlogfile", passlog] + _tail(out, pix)
     return [p1, p2]

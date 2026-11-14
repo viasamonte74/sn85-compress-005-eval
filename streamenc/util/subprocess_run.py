@@ -11,6 +11,10 @@ from typing import Sequence
 from streamenc.util import deadline as _deadline
 
 
+class CancelledCommand(subprocess.TimeoutExpired):
+    """The child was killed because its ``cancel`` event was set (free-time work no longer free)."""
+
+
 @dataclass(frozen=True)
 class CommandResult:
     argv: tuple[str, ...]
@@ -30,6 +34,7 @@ def run_command(
     timeout: float | None = None,
     check: bool = False,
     text: bool = True,
+    cancel: "threading.Event | None" = None,
 ) -> CommandResult:
     """Run ``argv`` to completion, capturing output and the child's CPU time (``os.wait4``).
 
@@ -68,8 +73,16 @@ def run_command(
             t.start()
         timed_out = False
         end = None if timeout is None else time.monotonic() + timeout  # one budget for both pipes
+        cancelled = False
         for t in threads:
-            t.join(None if end is None else max(0.0, end - time.monotonic()))
+            if cancel is None:  # the default path, unchanged
+                t.join(None if end is None else max(0.0, end - time.monotonic()))
+            else:  # join in slices so the ``cancel`` event (free-time work) can stop the child at once
+                while t.is_alive() and not cancel.is_set():
+                    if end is not None and time.monotonic() >= end:
+                        break
+                    t.join(0.2 if end is None else max(0.0, min(0.2, end - time.monotonic())))
+                cancelled = t.is_alive() and cancel.is_set()
             if t.is_alive():
                 timed_out = True
                 break
@@ -85,6 +98,8 @@ def run_command(
         _deadline.unregister(proc)
     proc.returncode = os.waitstatus_to_exitcode(status)
     if timed_out:
+        if cancelled:
+            raise CancelledCommand(list(argv), timeout or 0.0)
         raise subprocess.TimeoutExpired(list(argv), timeout or 0.0)
     out = chunks.get("out") or ("" if text else b"")
     err = chunks.get("err") or ("" if text else b"")

@@ -1,0 +1,55 @@
+{
+ "batches": [
+  {
+   "batch": 0,
+   "list": "e2e_test16_hidden_like",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 26.131
+  },
+  {
+   "batch": 1,
+   "list": "e2e_test16_hidden_like",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 17.404
+  },
+  {
+   "batch": 2,
+   "list": "e2e_test16_hidden_like",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 33.902
+  },
+  {
+   "batch": 3,
+   "list": "e2e_test16_hidden_like",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 31.474
+  }
+ ],
+ "all": {
+  "n": 16,
+  "frames": 3459,
+  "wall_seconds": 108.91,
+  "runtime_3428": 107.9,
+  "speed": 1.0,
+  "quality": 0.8471,
+  "final": 0.8471,
+  "n_passed": 16
+ },
+ "e2e_test16_hidden_like": {
+  "n": 16,
+  "frames": 3459,
+  "wall_seconds": 108.91,
+  "runtime_3428": 107.9,
+  "speed": 1.0,
+  "quality": 0.8471,
+  "final": 0.8471,
+  "n_passed": 16
+ },
+ "model": "models/crf_predictor.pkl",
+ "cpus": "0-31",
+ "batch": 4
+}

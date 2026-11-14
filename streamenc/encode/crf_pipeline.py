@@ -17,6 +17,7 @@ import re
 import os
 import shutil
 import tempfile
+import threading
 import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -29,7 +30,9 @@ from streamenc.probe import probe_video
 from streamenc.probe.ffprobe_meta import gop_for_timestamps, packet_pts
 from streamenc.util.logging import get_logger
 from streamenc.util.subprocess_run import run_command
-from streamenc.validate.vmaf import quick_vmaf_gap
+from streamenc.validate.vmaf import quick_vmaf_gap, relabel_vf
+from streamenc.batch import state as _bstate
+from streamenc.util.subprocess_run import CancelledCommand
 from streamenc.validate.official_streaming import (
     measure_streaming,
     read_packets_ffprobe,
@@ -51,9 +54,11 @@ PILOT_TOL_LOG = float(os.environ.get("STREAMENC_PILOT_TOL", "0.04"))  # pilot co
 PILOT_BRACKET_LOG = float(os.environ.get("STREAMENC_PILOT_BRACKET", "0.12"))  # ... or when points within 12 % bracket the aim (interpolated estimate)
 PILOT_MAX = int(os.environ.get("STREAMENC_PILOT_MAX", "2"))  # e2e 2026-11-11: 5 -> 2 pilots, practice 118.4 -> 91.0 s, quality equal
 FINAL_MAX_FIX = 2
-# ---- VMAF-NEG gate (validator: |VMAF - VMAF-NEG| > 3.0 -> clip score 0). Labels (669 clips): the
-# qm_la tune-1 arms fail it on 8-11 % of natural (Wikimedia) clips, tune-0 on 2.4 %, p8_t1 on 0.6 %;
-# p2 then fallback t0 then p8_t1 lifts the gate-aware mean clip score there 0.702 -> 0.791.
+# ---- VMAF-NEG gate (validator: |VMAF - VMAF-NEG| > 3.0 -> clip score 0). Fallback order NEG_SAFE_ARMS, derived
+# 2026-11-12 on the compliant label set only (656 AI / render / screen clips, no natural footage; MINING.md training-
+# data rule): gate fail rate 0.15 % for p3_t0 / p4_lqb / p8_t1 vs 0.31-0.46 % for the other arms; in the 16 primary-
+# arm failures (5 clips) tune-0 passes with the widest margin (gaps 2.35-2.93 vs p4_lqb 2.88-3.00) and t0 -> p8_t1
+# rescues 4 of the 5 clips (mean clip score 0 -> 0.275).
 # ---- decode-once source cache: every encode attempt re-decoded the FFV1 source (1080p ~65 ms/frame,
 # ~17 % of runtime CPU on e2e_test16 at 4.5 attempts/clip). CFR sources are decoded once to raw y4m
 # (rawvideo in Matroska) on local disk (page cache, reclaimable: no tmpfs/RAM pinning in the 8 GB sandbox).
@@ -99,10 +104,73 @@ FILTER_PROBE_MODE = os.environ.get("STREAMENC_FILTER_PROBE_MODE", "segment")
 # (trained on offline single-segment probes of every labelled clip, scripts/train_filter_gain.py; model files with
 # .fgain_model). Where the fixed rule would filter, the filter is kept only if the predicted gain > the margin.
 FILTER_MODEL = os.environ.get("STREAMENC_FILTER_MODEL", "0") not in ("0", "", "false", "no")
+# 2026-11-12 free-time refill (research, default OFF): easy clips aim at FINAL_AIM_EASY and the fill-up is weighed
+# against lam x CPU, so they often ship at 70-89 % of the budget (test16: q04 0.742 / VMAF 96.83). A batch lasts as
+# long as its slowest clip: while another clip is still running, one refill aiming at FREE_FILL_AIM costs no wall
+# time. It is cancelled the moment this clip is the last one running (streamenc.batch.state), kept only if valid.
+FREE_FILL = os.environ.get("STREAMENC_FREE_FILL", "0") not in ("0", "", "false", "no")
+FREE_FILL_BELOW = 0.97
+FREE_FILL_AIM = 0.985
+# 2026-11-12 (research, default OFF): the VMAF-NEG check samples every 5th frame, which read the gap 0.28 low on a
+# 60 fps clip (exact on 24/30 fps within 0.03); at or above this frame rate measure every frame (0 = never).
+NEG_FULL_FPS = float(os.environ.get("STREAMENC_NEG_FULL_FPS", "0"))
 FILTER_MODEL_MARGIN = float(os.environ.get("STREAMENC_FILTER_MODEL_MARGIN", "0.1"))
 FILTER_PROBE_EARLY_MAX = float(os.environ.get("STREAMENC_FILTER_PROBE_EARLY_MAX", "85"))
 if FILTER_PROBE_MODE == "segment" and "STREAMENC_FILTER_PROBE_MAX_PRED" not in os.environ:
     FILTER_PROBE_MAX_PRED = float(os.environ.get("STREAMENC_HARD_VMAF", "80"))  # = HARD_VMAF (defined below)
+
+
+# 2026-11-13 research only (default off): "perfect prediction" oracle. JSON {input basename: VMAF shift} added to every
+# arm's stage-2 prediction, so the run routes as if the model had predicted the real VMAF. Never set at run time.
+PRED_SHIFT_FILE = os.environ.get("STREAMENC_PRED_SHIFT_FILE", "")
+# 2026-11-13 colour fix: relabel untagged sources as BT.709 before encoding (see validate.vmaf.relabel_vf); "0" = old behaviour
+COLOUR_RELABEL = os.environ.get("STREAMENC_COLOUR_RELABEL", "1") not in ("0", "", "false", "no")
+
+
+def _pred_shift(input_path: str) -> float:
+    if not PRED_SHIFT_FILE:
+        return 0.0
+    import json as _json
+    try:
+        return float(_json.loads(Path(PRED_SHIFT_FILE).read_text()).get(os.path.basename(input_path), 0.0))
+    except Exception:  # noqa: BLE001
+        return 0.0
+
+
+# 2026-11-13 clean-content tools (scripts/clean_config_search.py, results/clean_search): extra SVT-AV1 options added to
+# every final / fallback encode (never to the p8 pilots, whose CRF response is a model input, nor to p8 / p12 speed
+# encodes). STREAMENC_SVT_EXTRA = comma list of tool names below ("" = off). SVT 4.3 ignores the chroma-u/v-*-qindex
+# options; use-fixed-qindex-offsets=2 applies only the chroma offsets (luma rate control unchanged). VMAF is luma-only.
+SVT_TOOLS: dict[str, dict[str, Any]] = {
+    "chq63": {"use-fixed-qindex-offsets": 2, "key-frame-chroma-qindex-offset": 63, "chroma-qindex-offsets": "63,63,63,63,63,63"},
+    "chq32": {"use-fixed-qindex-offsets": 2, "key-frame-chroma-qindex-offset": 32, "chroma-qindex-offsets": "32,32,32,32,32,32"},
+    "sqo8": {"startup-qp-offset": -8},
+    "scm1": {"scm": 1},
+    "acb1": {"ac-bias": 1.0},
+    "vb2o2": {"enable-variance-boost": 1, "variance-boost-strength": 2, "variance-octile": 2},
+}
+# 1.0.0rc9 default "chq63": label search on render / screen / AI training clips +0.30 / +0.47 VMAF at presets 4 / 6
+# (CPU x0.8-1.0, VMAF - VMAF-NEG gap unchanged); e2e practice 0.7673, test16 0.8481, hard 0.6543, held-out 0.6485 q.
+SVT_EXTRA = [t for t in os.environ.get("STREAMENC_SVT_EXTRA", "chq63").split(",") if t]
+# Tools for clips the content classifier (predictor .kind_model, features only) calls render / screen: on AI clips
+# they gained nothing and screen-content mode costs up to 1.7x encode CPU there.
+# OFF by default (rc9 tests: the classifier calls the practice renders AI, start-up QP -8 cannot fit hard 60 fps renders
+# at CRF 63 and blew the rate model up at low CRF; screen-content mode cost 3-4x CPU on near-lossless screens).
+SVT_EXTRA_CLEAN = [t for t in os.environ.get("STREAMENC_SVT_EXTRA_CLEAN", "").split(",") if t]
+CLEAN_P_MIN = float(os.environ.get("STREAMENC_CLEAN_P_MIN", "0.5"))
+SVT_EXTRA_SKIP = {"svt_crf_p8_t1", "svt_crf_p12_t1"}
+
+
+def _arm(arm_id: str, extra: list[str] | None = None) -> dict[str, Any]:
+    """get_arm plus the clean-content SVT tools (``extra`` overrides STREAMENC_SVT_EXTRA for this clip)."""
+    arm = get_arm(arm_id)
+    tools = SVT_EXTRA if extra is None else extra
+    if not tools or arm_id in SVT_EXTRA_SKIP or arm.get("codec") != "libsvtav1":
+        return arm
+    svt = dict(arm.get("svt", {}))
+    for t in tools:
+        svt.update(SVT_TOOLS[t])
+    return {**arm, "svt": svt}
 
 
 def _pilot_vmaf_at_budget(pts: list[tuple[float, float]]) -> float:
@@ -120,6 +188,13 @@ STAGE2_SHIP_PILOT_USE = 0.85  # stage-2 hopeless: ship the valid pilot if it use
 NEG_LIMIT = 3.0
 NEG_SAFE = 2.85          # subsampled estimate error <= 0.07 (vmaf.quick_vmaf_gap); margin for it
 NEG_CHECK_P = 0.005      # measure when the model gives P(gap > NEG_SAFE) >= this (cost ~2-14 CPU-s)
+# 1.0.0rc13: also measure the gap when the gap model cannot vouch for the shipped encode: no prediction for its arm
+# (the q08-route hard arm: val16b v16bai_medium_001 shipped gap 3.25 unmeasured -> gate fail, 0 points) or a
+# prefilter on it (the gap models were trained on unfiltered encodes). Unseen val16d / val16e: outputs unchanged.
+NEG_CHECK_UNKNOWN = os.environ.get("STREAMENC_NEG_CHECK_UNKNOWN", "1") not in ("0", "", "false", "no")
+# 1.0.0rc16 (from rc15): when no fallback reaches NEG_SAFE on the 1-in-5-frame estimate, the shipped encode is chosen by
+# every-frame measurements (val16f v16fai_medium_001 shipped at a true 2.887 from an estimate of 2.852).
+NEG_EXACT_PICK = os.environ.get("STREAMENC_NEG_EXACT_PICK", "1") not in ("0", "", "false", "no")
 NEG_SUBSAMPLE = 5
 NEG_SAFE_ARMS = ("svt_crf_p3_t0_qm_la", "svt_crf_p8_t1")
 # median CRF(target arm) - CRF(source arm) at equal budget use (CRF normalised to 98.5 % use), quarter steps.
@@ -142,7 +217,10 @@ FINAL_AIM_EASY = float(os.environ.get("STREAMENC_FINAL_AIM_EASY", "0.92"))
 # Predicted best VMAF below this: the clip scores 0 whatever we ship (gate fail == VMAF < 60 == 0),
 # so encode once with the speed arm and ship it without a rate search.
 DEEP_HOPELESS_VMAF = 50.0
-DEFAULT_LAM = 0.012  # VMAF per CPU-second (speed term), used when the plan carries none
+# VMAF per CPU-second (speed term), used when the plan carries none (the shipped model carries the same 0.012).
+# Re-checked 2026-11-12 on compliant data only (CC0 practice pack + 65 held-out AI / render / screen clips, 4-clip
+# batches): final practice / held-out = 0.7652 / 0.6215 at 0.008, 0.7672 / 0.6260 at 0.012, 0.7614 / 0.6274 at 0.016.
+DEFAULT_LAM = 0.012
 # ---- hard-AI path + segment fill (2026-11-11, candidate; switches default OFF until approved for shipping)
 # Hard clips (predicted best VMAF < HARD_VMAF): chroma blur + 85 % low-pass before every encode. Practice q07/q08
 # (p2, corrected to full budget): +0.66 / +0.68 VMAF, NEG gap +0.07, chroma / tone gates pass.
@@ -180,6 +258,10 @@ SEGFILL_K = 0.048          # default ln(bits) increase per quarter CRF step (q08
 # encode in total and ~99 % of the budget. Segment encodes are as efficient as a whole-clip encode.
 SEGFINAL = os.environ.get("STREAMENC_SEGFINAL", "1") not in ("0", "", "false", "no")
 SEGFINAL_AIM = float(os.environ.get("STREAMENC_SEGFINAL_AIM", "0.992"))
+# 2026-11-13: most quarter steps one early bump may move the other segments (was fixed at 2; anim_hard_007_i60_1080
+# with chroma QP needed 4 -> two extra probe encodes, +150 CPU-s). The step count is the computed need, so a larger cap
+# only matters when the need is larger.
+EARLY_BUMP_MAX_STEPS = int(os.environ.get("STREAMENC_EARLY_BUMP_MAX_STEPS", "4"))  # rc9: 4 (held-out 168.0 -> 159.8 s)
 SEGFINAL_SPREAD = 0.75     # max CRF difference between segments of one clip
 SEGFINAL_MIN_CRF = 15.0    # below this (near-lossless, mostly screen) keep the whole-clip fit
 SEGFINAL_PAR = int(os.environ.get("STREAMENC_SEGFINAL_PAR", "2"))
@@ -269,6 +351,10 @@ def _bracket_done(points: list[tuple[float, float, bool]]) -> bool:
     return hi_over is not None and lo_ok is not None and 0 < lo_ok - hi_over <= CRF_QUANT + 1e-9
 
 
+_RAW_LOCK = threading.Lock()
+_RAW_RESERVED = [0.0]   # bytes of raw caches being written right now (all clips of the batch)
+
+
 def _raw_source(input_path: str, meta: Any, pts: list[float]) -> tuple[str | None, str | None, float]:
     """Decode ``input_path`` once to rawvideo-in-Matroska in a local temp dir: keeps the source's
     timestamps and colour tags, so every encode from it is byte-identical to encoding the source
@@ -283,21 +369,47 @@ def _raw_source(input_path: str, meta: Any, pts: list[float]) -> tuple[str | Non
         bpp *= 4.0 / 3.0
     raw_bytes = meta.width * meta.height * bpp * meta.nb_frames
     base = tempfile.gettempdir()
+    # 1.0.0rc16 (from rc15): the batch's clips run as threads and each checked the free space on its own, so on a small
+    # /tmp they could all pass and then fill it together; caches still being written are now reserved under a lock.
+    with _RAW_LOCK:
+        try:
+            free = shutil.disk_usage(base).free - _RAW_RESERVED[0]
+        except OSError:
+            return None, None, 0.0
+        if raw_bytes > RAW_CACHE_MAX_BYTES or free < 2.0 * raw_bytes + 1e9:
+            return None, None, 0.0
+        _RAW_RESERVED[0] += raw_bytes
     try:
-        free = shutil.disk_usage(base).free
-    except OSError:
-        return None, None, 0.0
-    if raw_bytes > RAW_CACHE_MAX_BYTES or free < 2.0 * raw_bytes + 1e9:
-        return None, None, 0.0
-    d = tempfile.mkdtemp(prefix="streamenc-raw-", dir=base)
-    raw = os.path.join(d, "src.mkv")
-    r = run_command([FFMPEG_BIN, "-hide_banner", "-nostdin", "-y", "-loglevel", "error", "-i", input_path,
-                     "-map", "0:v:0", "-an", "-sn", "-dn", "-c:v", "rawvideo", "-f", "matroska", raw], timeout=1800)
+        d = tempfile.mkdtemp(prefix="streamenc-raw-", dir=base)
+        raw = os.path.join(d, "src.mkv")
+        r = run_command([FFMPEG_BIN, "-hide_banner", "-nostdin", "-y", "-loglevel", "error", "-i", input_path,
+                         "-map", "0:v:0", "-an", "-sn", "-dn", "-c:v", "rawvideo", "-f", "matroska", raw], timeout=1800)
+    finally:
+        with _RAW_LOCK:
+            _RAW_RESERVED[0] -= raw_bytes
     ok = r.ok and os.path.exists(raw) and os.path.getsize(raw) >= 0.98 * raw_bytes
     if not ok:
         shutil.rmtree(d, ignore_errors=True)
         return None, None, float(r.cpu_seconds)
     return raw, d, float(r.cpu_seconds)
+
+
+# 1.0.0rc16 raw-cache prefetch: probe, packet timestamps and the raw cache of the source (the first steps of
+# encode_item_crf, same calls and same results) start in a background thread when the clip starts, so they overlap the
+# feature extraction and model wait instead of following them (sequential: 1.5-2.7 s + 0.4-2.8 s per clip).
+RAW_PREFETCH = os.environ.get("STREAMENC_RAW_PREFETCH", "1") not in ("0", "", "false", "no")
+
+
+def _prefetch_source(input_path: str) -> tuple[Any, list[float], tuple[str | None, str | None, float], float, float]:
+    t0 = time.perf_counter()
+    meta = probe_video(input_path, count_frames=True)
+    try:
+        pts = packet_pts(input_path)
+    except Exception:  # noqa: BLE001
+        pts = []
+    t1 = time.perf_counter()
+    raw = _raw_source(input_path, meta, pts)
+    return meta, pts, raw, t1 - t0, time.perf_counter() - t1
 
 
 def encode_item_crf(
@@ -311,15 +423,32 @@ def encode_item_crf(
     peak_ratio: float = 1.5,
     time_budget_seconds: float | None = None,
     threads: int | None = None,
+    prefetch: Any = None,
 ) -> CrfOutcome:
     t_start = time.perf_counter()
     tm: dict[str, float] = {}   # wall seconds of the stages no encode entry covers (logging only)
-    meta = probe_video(input_path, count_frames=True)
+    pre = None
+    if prefetch is not None:
+        try:
+            pre = prefetch.result()
+        except Exception:  # noqa: BLE001 - prefetch failed: do the same steps here, as without it
+            pre = None
+    if pre is not None:
+        tm["prefetch_wait"] = time.perf_counter() - t_start
+    meta = pre[0] if pre is not None else probe_video(input_path, count_frames=True)
+    # untagged source: relabel (as the validator does to the reference), never let ffmpeg convert it
+    relabel = relabel_vf(meta.pix_fmt, meta.color_space, meta.color_range) if COLOUR_RELABEL else None
+    clean_p = getattr(plan, "clean_p", None)
+    clip_extra: list[str] = list(SVT_EXTRA) + [t for t in SVT_EXTRA_CLEAN if clean_p is not None and clean_p >= CLEAN_P_MIN
+                                               and t not in SVT_EXTRA]
     target = streaming_target_kbps(width=meta.width, height=meta.height, fps=meta.fps, bits_per_pixel=bits_per_pixel)
-    try:
-        pts = packet_pts(input_path)
-    except Exception:  # noqa: BLE001
-        pts = []
+    if pre is not None:
+        pts = pre[1]
+    else:
+        try:
+            pts = packet_pts(input_path)
+        except Exception:  # noqa: BLE001
+            pts = []
     gop = gop_for_timestamps(pts, meta.fps, max_keyframe_interval) if pts else \
         max(1, int(max_keyframe_interval * meta.fps + 1e-9))
     tm["probe"] = time.perf_counter() - t_start
@@ -327,10 +456,12 @@ def encode_item_crf(
     out_dir.mkdir(parents=True, exist_ok=True)
     work = Path(tempfile.mkdtemp(prefix=".crf-", dir=out_dir))
     hist: list[dict[str, Any]] = []
+    if SVT_EXTRA or SVT_EXTRA_CLEAN:
+        hist.append({"tag": "svt_extra", "tools": clip_extra, "clean_p": None if clean_p is None else round(clean_p, 3)})
     bg_jobs: list = []    # background futures (segment filter probe): waited for before the work dir is removed
     cpu_total = 0.0
     src = input_path      # encoder/VMAF source: the raw cache once made
-    raw_dir: str | None = None
+    raw_dir: str | None = pre[2][1] if pre is not None else None   # removed in the finally below whatever happens
     enc_seconds = 0.0
     attempts = 0
     kw = dict(fps=meta.fps, frames=meta.nb_frames, target=target, max_keyframe_interval=max_keyframe_interval,
@@ -341,17 +472,22 @@ def encode_item_crf(
             return float("inf")
         return time_budget_seconds - (time.perf_counter() - t_start)
 
-    def _encode(arm_id: str, crf: float, tag: str) -> tuple[str | None, float | None, list[str], Any]:
+    def _encode(arm_id: str, crf: float, tag: str, cancel=None) -> tuple[str | None, float | None, list[str], Any]:
         nonlocal cpu_total, enc_seconds, attempts
         attempts += 1
-        arm = get_arm(arm_id)
+        arm = _arm(arm_id, clip_extra)
         out = str(work / f"{tag}{attempts}.mp4")
         t0 = time.perf_counter()
         cpu = 0.0
         err = ""
         for cmd in build_commands(arm, src, out, target, gop, str(work / "pass"), hard_vf,
-                                  **({"threads": threads} if threads else {}), crf=crf):
-            r = run_command(cmd, timeout=3600)
+                                  **({"threads": threads} if threads else {}), crf=crf, pre_vf=relabel):
+            try:
+                r = run_command(cmd, timeout=3600, cancel=cancel)
+            except CancelledCommand:  # free-time work stopped: this clip is now the batch's last
+                hist.append({"tag": tag, "arm": arm_id, "crf": crf, "cancelled": True,
+                             "seconds": round(time.perf_counter() - t0, 3)})
+                return None, None, ["CANCELLED"], None
             cpu += r.cpu_seconds
             if not r.ok:
                 err = (r.stderr or r.stdout or "")[-300:].replace("\n", " ")
@@ -404,7 +540,7 @@ def encode_item_crf(
             o_ = str(work / f"fseg{int(filt)}.mp4")
             cpu_ = 0.0
             for cmd in build_commands(arm_, src, o_, target, gop, str(work / f"fsegpass{int(filt)}"), vf_,
-                                      **({"threads": threads} if threads else {}), crf=crf_):
+                                      **({"threads": threads} if threads else {}), crf=crf_, pre_vf=relabel):
                 r_ = run_command(cmd, timeout=900)
                 cpu_ += r_.cpu_seconds
                 if not r_.ok:
@@ -441,7 +577,7 @@ def encode_item_crf(
         from fractions import Fraction
         n = meta.nb_frames
         bounds = [(a, min(a + gop, n)) for a in range(0, n, gop)]
-        arm = get_arm(arm_id)
+        arm = _arm(arm_id, clip_extra)
         if len(bounds) < 2 or arm.get("rc") != "crf" or not pts or len(pts) != n:
             return None
         # e2e 2026-11-11: all 6 failures were near-lossless clips (CRF 2-12, screen content) whose limit is the 2 s
@@ -483,7 +619,7 @@ def encode_item_crf(
             vf = f"trim=start_frame={a}:end_frame={b},setpts=PTS-STARTPTS" + (f",{hard_vf}" if hard_vf else "")
             o = segdir / f"s{i:03d}_{int(round(crf_ * 100))}.ivf"
             for cmd in build_commands(arm, src, str(o), target, gop, str(segdir / f"pass{i}"), vf,
-                                      **({"threads": threads} if threads else {}), crf=crf_):
+                                      **({"threads": threads} if threads else {}), crf=crf_, pre_vf=relabel):
                 cmd[len(cmd) - 1 - cmd[::-1].index("-f") + 1] = "ivf"
                 rr = run_command(cmd, timeout=3600)
                 seg_cpu += rr.cpu_seconds
@@ -594,7 +730,7 @@ def encode_item_crf(
                 if need > 0.7 * cap:
                     early = True
                     per_step = max((1.0 - p_sh) * (1.0 - math.exp(-k * CRF_QUANT)), 1e-6)  # cut per step of the others
-                    nstep = max(1, min(2, math.ceil(max(need - 0.5 * cap, 0.0) / per_step)))
+                    nstep = max(1, min(EARLY_BUMP_MAX_STEPS, math.ceil(max(need - 0.5 * cap, 0.0) / per_step)))
                     stp = max(stp, CRF_QUANT * nstep)
                     hist.append({"tag": "early_bump", "use": round(use, 4), "need": round(need, 4),
                                  "probe_cap": round(cap, 4), "step": stp})
@@ -691,7 +827,7 @@ def encode_item_crf(
             hist.append({"tag": "segfill", "skip": "time"})
             return best
         # encode the chosen segments one quarter step lower (same arm, same prefilter, keyframe first)
-        arm = get_arm(arm_id)
+        arm = _arm(arm_id, clip_extra)
         lo: dict[int, Path] = {}
         t0 = time.perf_counter()
         seg_cpu = 0.0
@@ -700,7 +836,7 @@ def encode_item_crf(
             vf = f"trim=start_frame={a}:end_frame={b},setpts=PTS-STARTPTS" + (f",{hard_vf}" if hard_vf else "")
             o = segdir / f"lo{i:03d}.ivf"
             cmds = build_commands(arm, src, str(o), target, gop, str(segdir / f"pass{i}"), vf,
-                                  **({"threads": threads} if threads else {}), crf=crf0 - CRF_QUANT)
+                                  **({"threads": threads} if threads else {}), crf=crf0 - CRF_QUANT, pre_vf=relabel)
             for cmd in cmds:
                 j = len(cmd) - 1 - cmd[::-1].index("-f")
                 cmd[j + 1] = "ivf"
@@ -854,7 +990,11 @@ def encode_item_crf(
                                   reason="deep_hopeless" + (f" {','.join(codes)}" if codes else ""), history=hist)
         # ---- decode the source once (>= 2 encodes follow from here)
         t1 = time.perf_counter()
-        y4m, raw_dir, raw_cpu = _raw_source(input_path, meta, pts)
+        if pre is not None:
+            y4m, raw_dir, raw_cpu = pre[2]
+            tm["raw_cache_bg"] = round(pre[4], 3)
+        else:
+            y4m, raw_dir, raw_cpu = _raw_source(input_path, meta, pts)
         tm["raw_cache"] = time.perf_counter() - t1
         cpu_total += raw_cpu
         if y4m is not None:
@@ -928,7 +1068,10 @@ def encode_item_crf(
             if points and getattr(plan, "stage2_fn", None) is not None:
                 t1 = time.perf_counter()
                 try:
-                    s2 = plan.stage2_fn(solve_crf(points, STAGE2_UTIL))
+                    _sh = _pred_shift(input_path)
+                    s2 = plan.stage2_fn(solve_crf(points, STAGE2_UTIL), **({"shift": _sh} if _sh else {}))
+                    if _sh:
+                        hist.append({"tag": "pred_shift", "shift": round(_sh, 3)})
                 except Exception:  # noqa: BLE001
                     s2 = None
                 tm["stage2"] = time.perf_counter() - t1
@@ -1080,6 +1223,7 @@ def encode_item_crf(
             fflags: list[tuple[float, float, bool]] = []
             fbest: tuple[str, float, Any, float] | None = None  # out, util, m, crf
             fixes = 0
+            free_done = [False]
             while True:
                 out, util, codes, m = _encode(arm_id, f_crf, tag)
                 if out is None:
@@ -1091,6 +1235,27 @@ def encode_item_crf(
                 if not over and (fbest is None or f_crf < fbest[3]):
                     fbest = (out, util, m, f_crf)
                 if not over and not _fill_worth(use, hist[-1].get("cpu_seconds", 0.0)):
+                    ev = _bstate.last_one_event(input_path) if FREE_FILL else None
+                    if (ev is not None and not ev.is_set() and use < FREE_FILL_BELOW and not free_done[0]
+                            and _remaining() >= 1.5 * hist[-1].get("seconds", 0.0) + 5.0):
+                        free_done[0] = True
+                        hi_over = max((c for c, _, o in fflags if o), default=None)
+                        x_ = _quant(solve_crf(fpoints, FREE_FILL_AIM, slope_hint=pilot_slope))
+                        x_ = min(x_, _quant(f_crf - CRF_QUANT))
+                        if hi_over is not None:
+                            x_ = max(x_, _quant(hi_over + CRF_QUANT))
+                        if CRF_MIN <= x_ < f_crf and x_ not in {c for c, _ in fpoints}:
+                            o2, u2, c2, m2 = _encode(arm_id, x_, tag + "free", cancel=ev)
+                            rec_ = {"tag": "free_fill", "from_crf": f_crf, "from_use": round(use, 4), "crf": x_}
+                            if o2 is not None:
+                                use2 = budget_use(m2.avg_kbps, m2.peak_kbps, target, peak_ratio)
+                                ok2 = not c2 and u2 <= ACCEPT_HIGH
+                                rec_.update({"use": round(use2, 4), "kept": ok2})
+                                if ok2 and (fbest is None or x_ < fbest[3]):
+                                    fbest = (o2, u2, m2, x_)
+                            else:
+                                rec_["kept"] = False
+                            hist.append(rec_)
                     break
                 if fixes >= FINAL_MAX_FIX or _bracket_done(fflags):
                     break
@@ -1148,22 +1313,32 @@ def encode_item_crf(
             g, sd = r
             return 0.5 * (1.0 - math.erf((NEG_SAFE - g) / (max(sd, 0.05) * math.sqrt(2.0))))
 
-        def _gap(out_path: str, arm_id: str) -> float | None:
+        gap_of: dict[str, tuple[float, bool]] = {}   # file -> (gap, every frame) of each measurement
+
+        def _gap(out_path: str, arm_id: str, exact: bool = False) -> float | None:
             nonlocal cpu_total
             try:
-                q = quick_vmaf_gap(src, out_path, subsample=NEG_SUBSAMPLE, reference_meta=meta)
+                full_ = exact or (bool(NEG_FULL_FPS) and float(meta.fps) >= NEG_FULL_FPS)
+                q = quick_vmaf_gap(src, out_path, subsample=1 if full_ else NEG_SUBSAMPLE, reference_meta=meta,
+                                   threads=(8, 8) if full_ else None)
             except Exception as exc:  # noqa: BLE001
                 hist.append({"tag": "neg_check", "arm": arm_id, "error": str(exc)[-200:]})
                 return None
             cpu_total += q.cpu_seconds
             hist.append({"tag": "neg_check", "arm": arm_id, "gap": round(q.gap, 3), "vmaf": round(q.vmaf, 3),
-                         "seconds": round(q.wall_seconds, 3), "cpu_seconds": round(q.cpu_seconds, 3)})
+                         "seconds": round(q.wall_seconds, 3), "cpu_seconds": round(q.cpu_seconds, 3)}
+                        | ({"exact": True} if exact else {}))
+            gap_of[out_path] = (q.gap, bool(full_))
             return q.gap
 
         neg_reason = ""
         if not plan.hopeless:
             p_fail = _p_neg(chosen_id, best[3])
-            if p_fail is not None and p_fail >= NEG_CHECK_P:
+            unknown_ = NEG_CHECK_UNKNOWN and (p_fail is None or bool(hard_vf))
+            if unknown_ and (p_fail is None or p_fail < NEG_CHECK_P):
+                hist.append({"tag": "neg_unknown", "arm": chosen_id, "p_fail": None if p_fail is None else round(p_fail, 4),
+                             "filtered": bool(hard_vf)})
+            if unknown_ or (p_fail is not None and p_fail >= NEG_CHECK_P):
                 g0 = _gap(best[0], chosen_id)
                 if g0 is not None and g0 > NEG_SAFE:
                   tried = [(g0, best, chosen_id, hard_vf)]
@@ -1205,6 +1380,19 @@ def encode_item_crf(
                         src_arm, src_crf = alt, alt_best[3]
                   except Exception as exc:  # noqa: BLE001 — ship the best encode tried so far
                     hist.append({"tag": "neg_fallback", "error": str(exc)[-200:]})
+                  if NEG_EXACT_PICK and len(tried) > 1 and min(r[0] for r in tried) > NEG_SAFE:
+                      # 1.0.0rc16 (from rc15): no candidate reached NEG_SAFE on the 1-in-5 estimate: measure every frame of
+                      # each and ship the lowest true gap (an estimate can be off by up to 0.07 either way)
+                      ex_ = []
+                      for g_, b_, a_, f_ in tried:
+                          k_ = gap_of.get(b_[0])
+                          ge = k_[0] if k_ and k_[1] else None
+                          if ge is None and g_ <= NEG_LIMIT and _remaining() > 15.0:
+                              ge = _gap(b_[0], a_, exact=True)
+                          ex_.append((ge if ge is not None else g_, b_, a_, f_))
+                      hist.append({"tag": "neg_exact_pick", "estimates": [round(r[0], 3) for r in tried],
+                                   "exact": [round(r[0], 3) for r in ex_]})
+                      tried = ex_
                   g_ship, best, chosen_id, hard_vf = min(tried, key=lambda r: r[0])  # segfill uses the shipped filter
                   neg_reason = f"neg_fallback gap {g0:.2f}->{g_ship:.2f}"
         if SEGFILL and not plan.hopeless and get_arm(chosen_id).get("rc") == "crf":
@@ -1268,6 +1456,15 @@ def process_item_crf(
     plan_seconds = 0.0
     plan = Plan()
     rule_id = "CRF_DEFAULT"
+    pre = None
+    if RAW_PREFETCH:
+        try:
+            from concurrent.futures import ThreadPoolExecutor
+            pool_ = ThreadPoolExecutor(1, thread_name_prefix="prefetch")
+            pre = pool_.submit(_prefetch_source, input_path)
+            pool_.shutdown(wait=False)
+        except Exception:  # noqa: BLE001 - no prefetch: encode_item_crf does these steps itself
+            pre = None
     try:
         analysis = analyze_video(input_path, mode="sampled", max_samples=max_samples, max_width=640)
         feature_seconds = time.perf_counter() - t0
@@ -1278,11 +1475,20 @@ def process_item_crf(
     except Exception as exc:  # noqa: BLE001 — never lose an item to the predictor
         log.warning("predictor failed for %s: %s", input_path, exc)
     remaining = None if time_budget_seconds is None else max(5.0, time_budget_seconds - (time.perf_counter() - t0))
-    outcome = encode_item_crf(
-        input_path, output_path, plan,
-        bits_per_pixel=bits_per_pixel, max_keyframe_interval=max_keyframe_interval,
-        peak_window=peak_window, peak_ratio=peak_ratio, time_budget_seconds=remaining,
-    )
+    try:
+        outcome = encode_item_crf(
+            input_path, output_path, plan,
+            bits_per_pixel=bits_per_pixel, max_keyframe_interval=max_keyframe_interval,
+            peak_window=peak_window, peak_ratio=peak_ratio, time_budget_seconds=remaining, prefetch=pre,
+        )
+    finally:
+        if pre is not None:  # the raw cache dir (encode_item_crf removes it too; this covers an early exception)
+            try:
+                rd = pre.result()[2][1]
+                if rd:
+                    shutil.rmtree(rd, ignore_errors=True)
+            except Exception:  # noqa: BLE001
+                pass
     log.info(
         "item %s: %s crf=%s util=%s attempts=%d (pilot %d) cpu=%.1fs wall=%.1fs plan=%s%s",
         Path(input_path).name[:12], outcome.config_id, outcome.crf,

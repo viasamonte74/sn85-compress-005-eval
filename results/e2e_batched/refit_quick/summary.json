@@ -1,0 +1,34 @@
+{
+ "batches": [
+  {
+   "batch": 0,
+   "list": "val16_b2",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 31.441
+  }
+ ],
+ "all": {
+  "n": 4,
+  "frames": 829,
+  "wall_seconds": 31.44,
+  "runtime_3428": 130.0,
+  "speed": 0.9685,
+  "quality": 0.856,
+  "final": 0.8479,
+  "n_passed": 4
+ },
+ "val16_b2": {
+  "n": 4,
+  "frames": 829,
+  "wall_seconds": 31.44,
+  "runtime_3428": 130.0,
+  "speed": 0.9685,
+  "quality": 0.856,
+  "final": 0.8479,
+  "n_passed": 4
+ },
+ "model": "models/crf_predictor.pkl",
+ "cpus": "0-31",
+ "batch": 4
+}

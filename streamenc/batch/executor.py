@@ -14,6 +14,7 @@ from typing import Any, Callable
 
 from streamenc.pipeline.item import ItemResult, process_item
 from streamenc.score import final_score
+from streamenc.batch import state as _bstate
 from streamenc.util import deadline as _deadline
 from streamenc.util.logging import get_logger
 
@@ -132,7 +133,15 @@ def run_batch_parallel(
     t0 = time.perf_counter()
     items: list[ItemResult] = []
     pool = ThreadPoolExecutor(max_workers=max(1, workers))
-    futs = {pool.submit(process_fn, inp, out, **kwargs): (inp, out) for inp, out in pairs}
+
+    def _run(inp_: str, out_: str):  # register while running: free-time work (streamenc.batch.state)
+        _bstate.enter(inp_)
+        try:
+            return process_fn(inp_, out_, **kwargs)
+        finally:
+            _bstate.leave(inp_)
+
+    futs = {pool.submit(_run, inp, out): (inp, out) for inp, out in pairs}
     pending = set(futs)
     while pending:
         left = _deadline.remaining()

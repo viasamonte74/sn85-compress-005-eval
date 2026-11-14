@@ -43,6 +43,17 @@ CANONICAL_TIMESCALE = 90000
 _UNSPECIFIED_TAGS = frozenset({"", "unknown", "unspecified", "reserved"})
 
 
+def relabel_vf(pix_fmt: str | None, color_space: str | None, color_range: str | None) -> str | None:
+    """2026-11-13: the filter that makes an encode keep an untagged source's pixels. The validator relabels an untagged
+    reference as BT.709 (canonicalization below); the encoder writes BT.709 tags, so without this ffmpeg 8 CONVERTS
+    unknown -> BT.709 through RGB and the output no longer matches the reference (luma 29 vs 39 dB on a Wan clip).
+    None for tagged sources (their encodes are unchanged)."""
+    fill = untagged_color_fill(pix_fmt, color_space or "unknown", color_range or "unknown")
+    kv = ([f"colorspace={CANONICAL_COLOR}"] if fill.get("fill_color_space") else []) + \
+         ([f"range={CANONICAL_RANGE}"] if fill.get("fill_color_range") else [])
+    return "setparams=" + ":".join(kv) if kv else None
+
+
 def untagged_color_fill(pix_fmt: str | None, color_space: str | None, color_range: str | None) -> dict[str, bool]:
     """Mirror of validator ``untagged_color_fill``: fill only *stated-but-unspecified*
     tags of a YUV stream; ``None`` (probe says nothing) fills nothing."""
@@ -90,7 +101,8 @@ def canonicalize(path: str, output_path: str, *, ffmpeg: str | None = None, time
     from streamenc.probe import probe_video
 
     info = probe_video(path, count_frames=False)
-    fill = untagged_color_fill(info.pix_fmt, info.color_space, info.color_range)
+    # validator probe (vidaio backends_real.probe): a missing tag is reported as "unknown" -> filled (relabelled)
+    fill = untagged_color_fill(info.pix_fmt, info.color_space or "unknown", info.color_range or "unknown")
     argv = build_canonicalization_plan(path, output_path, ffmpeg=ffmpeg, **fill)
     result = run_command(argv, timeout=timeout)
     if not result.ok or not os.path.isfile(output_path):
@@ -276,8 +288,8 @@ def quick_vmaf_gap(
         pair_box = ["setpts=N/FRAME_RATE/TB"]  # replaced by _quick_pairing(rmeta) before the graph is built
 
         def _chain(meta) -> str:
-            fill = untagged_color_fill(getattr(meta, "pix_fmt", None), getattr(meta, "color_space", None),
-                                       getattr(meta, "color_range", None)) if meta is not None else {}
+            fill = untagged_color_fill(getattr(meta, "pix_fmt", None), getattr(meta, "color_space", None) or "unknown",
+                                       getattr(meta, "color_range", None) or "unknown") if meta is not None else {}
             f = []
             if fill:
                 kv = []

@@ -26,6 +26,26 @@ from streamenc.features.extract import FEATURE_NAMES
 
 GEOM_NAMES = ("log_pixels", "fps", "log_frames", "log_target_kbps")
 HOPELESS_VMAF = 57.0
+# 2026-11-13 slow-preset cap (val16: a 1080p screen clip predicted 99.1 VMAF was switched to preset 2 -> 334 CPU-s,
+# 47.6 s wall for +0.2 VMAF, the whole run went over the speed limit). When the best predicted VMAF is at least
+# SLOW_CAP_VMAF, only arms with preset >= SLOW_CAP_MIN_PRESET compete (STREAMENC_SLOW_CAP_VMAF=0 turns it off).
+# 1.0.0rc10 default 98.5: val16 120.6 -> 100.7 s, final 0.8897 -> 0.8922; practice / test16 / hard / held-out unchanged.
+SLOW_CAP_VMAF = float(os.environ.get("STREAMENC_SLOW_CAP_VMAF", "98.5"))
+SLOW_CAP_MIN_PRESET = int(os.environ.get("STREAMENC_SLOW_CAP_MIN_PRESET", "4"))
+
+
+def _arm_preset(arm_id: str) -> int:
+    import re as _re
+    m = _re.search(r"_p(\d+)", arm_id)
+    return int(m.group(1)) if m else 99
+
+
+def _slow_cap(util: dict, best: float) -> dict:
+    """Drop slow-preset arms from a utility table when the clip is predicted near the VMAF ceiling."""
+    if not SLOW_CAP_VMAF or best < SLOW_CAP_VMAF:
+        return util
+    fast = {a: u for a, u in util.items() if _arm_preset(a) >= SLOW_CAP_MIN_PRESET}
+    return fast or util
 SPEED_ARM = "svt_crf_p8_t1"
 
 
@@ -104,6 +124,7 @@ class CrfPredictorModel:
         else:
             # Utility: clip score gain (VMAF above the 60 floor counts, capped at 100) minus time cost.
             util = {a: min(max(vm[a], 60.0), 100.0) - lam * cpu.get(a, 0.0) for a in self.arms if a != SPEED_ARM}
+            util = _slow_cap(util, best_vmaf)
             arm, hopeless = max(util, key=util.get), False
         crf_start = float(np.clip(self.crf_model.predict(x)[0], 1.0, 63.0))
         rm = (getattr(self, "ratio_models", None) or {}).get(arm)
@@ -143,16 +164,18 @@ class CrfPredictorModel:
 
         v2 = getattr(self, "vmaf2_models", None) or {}
 
-        def stage2_fn(pilot_crf: float, _x=x):
-            """After the pilot: (arm, vmaf by arm, hopeless, best) from features + the pilot's CRF at budget."""
+        def stage2_fn(pilot_crf: float, _x=x, shift: float = 0.0):
+            """After the pilot: (arm, vmaf by arm, hopeless, best) from features + the pilot's CRF at budget.
+            ``shift`` (research oracle only, default 0) is added to every arm's prediction."""
             if not v2:
                 return None
             xx = np.append(_x, float(pilot_crf)).reshape(1, -1)
-            vm2 = {a: float(m.predict(xx)[0]) for a, m in v2.items()}
+            vm2 = {a: float(m.predict(xx)[0]) + shift for a, m in v2.items()}
             best2 = max(vm2.values())
             if best2 < HOPELESS_VMAF and in_range:
                 return SPEED_ARM, vm2, True, best2
             u2 = {a: min(max(vm2[a], 60.0), 100.0) - lam * cpu.get(a, 0.0) for a in vm2 if a != SPEED_ARM}
+            u2 = _slow_cap(u2, best2)
             return max(u2, key=u2.get), vm2, False, best2
 
         v3 = getattr(self, "vmaf3_models", None) or {}
@@ -180,6 +203,8 @@ class CrfPredictorModel:
         plan.stage2_fn = stage2_fn if v2 else None
         plan.stage3_fn = stage3_fn if v3 else None
         plan.fgain_fn = fgain_fn if fm is not None else None
+        km = getattr(self, "kind_model", None)  # 2026-11-13: P(render / screen) from the content features only
+        plan.clean_p = float(km.predict_proba(x[:, :len(FEATURE_NAMES)])[0, 1]) if km is not None else None
         return plan
 
 

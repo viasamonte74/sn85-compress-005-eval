@@ -1,0 +1,41 @@
+{
+ "batches": [
+  {
+   "batch": 0,
+   "list": "e2e_stress_lowsat",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 36.438
+  },
+  {
+   "batch": 1,
+   "list": "e2e_stress_lowsat",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 43.771
+  }
+ ],
+ "all": {
+  "n": 8,
+  "frames": 1395,
+  "wall_seconds": 80.21,
+  "runtime_3428": 197.1,
+  "speed": 0.8668,
+  "quality": 0.4811,
+  "final": 0.4619,
+  "n_passed": 8
+ },
+ "e2e_stress_lowsat": {
+  "n": 8,
+  "frames": 1395,
+  "wall_seconds": 80.21,
+  "runtime_3428": 197.1,
+  "speed": 0.8668,
+  "quality": 0.4811,
+  "final": 0.4619,
+  "n_passed": 8
+ },
+ "model": "models/crf_predictor.pkl",
+ "cpus": "0-31",
+ "batch": 4
+}

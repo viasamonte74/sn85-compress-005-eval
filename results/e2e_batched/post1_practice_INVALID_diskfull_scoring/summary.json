@@ -1,0 +1,41 @@
+{
+ "batches": [
+  {
+   "batch": 0,
+   "list": "e2e_practice",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 27.71
+  },
+  {
+   "batch": 1,
+   "list": "e2e_practice",
+   "n": 4,
+   "rc": 0,
+   "wall_seconds": 30.763
+  }
+ ],
+ "all": {
+  "n": 8,
+  "frames": 1812,
+  "wall_seconds": 58.47,
+  "runtime_3428": 110.6,
+  "speed": 1.0,
+  "quality": 0.6453,
+  "final": 0.6453,
+  "n_passed": 7
+ },
+ "e2e_practice": {
+  "n": 8,
+  "frames": 1812,
+  "wall_seconds": 58.47,
+  "runtime_3428": 110.6,
+  "speed": 1.0,
+  "quality": 0.6453,
+  "final": 0.6453,
+  "n_passed": 7
+ },
+ "model": "/workspace/sn85-candidates/sn85-005-1.0.0rc13.post1/models/crf_predictor.pkl",
+ "cpus": "0-31",
+ "batch": 4
+}

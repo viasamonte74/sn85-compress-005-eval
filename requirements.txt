@@ -7,3 +7,8 @@ scikit-learn==1.9.1
 scipy==1.18.1
 joblib==1.6.0
 threadpoolctl==3.8.0
+# Their own dependencies, pinned too (1.0.0rc15 licence check: pip pulled these unpinned): scikit-learn needs
+# narwhals>=2.0.1, joblib needs cloudpickle>=3.0. The Dockerfile installs with --no-deps + pip check, so the
+# image holds exactly these eight packages (the versions every test ran with).
+cloudpickle==3.1.2
+narwhals==2.28.0

@@ -209,6 +209,8 @@ def encode_rate_fit(
     ``encode_input``: byte-identical decoded copy of ``input_path`` to feed the encoder (raw cache);
     geometry, GOP and validation still come from ``input_path``."""
     meta = probe_video(input_path, count_frames=True)
+    from streamenc.validate.vmaf import relabel_vf  # 2026-11-13 colour fix (untagged sources are relabelled, not converted)
+    relabel = relabel_vf(meta.pix_fmt, meta.color_space, meta.color_range)
     target = streaming_target_kbps(width=meta.width, height=meta.height, fps=meta.fps,
                                    bits_per_pixel=bits_per_pixel)
     gop = safe_gop(input_path, meta.fps, max_keyframe_interval)
@@ -238,7 +240,7 @@ def encode_rate_fit(
                 aim = float(crf)  # recorded as the "aim" of a CRF trial
             att_cpu = 0.0
             for cmd in build_commands(arm, encode_input or input_path, out, target * (1.0 if crf_mode else aim), gop,
-                                      str(work / "pass"), vf, crf=crf if crf_mode else None):
+                                      str(work / "pass"), vf, crf=crf if crf_mode else None, pre_vf=relabel):
                 r = run_command(cmd, timeout=7200)
                 att_cpu += r.cpu_seconds
                 if not r.ok:
